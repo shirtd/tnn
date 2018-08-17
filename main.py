@@ -10,7 +10,7 @@ def main(args, data='train'):
     print('[ getting masks in dimension 0-%d' % args.dims)
     jdict = tda.get_masks(train, args.dims)
     print('[ building masks in dimension %d' % args.dim)
-    jdict['masks'] = tda.build_masks(jdict, args.dim)
+    jdict['masks'] = tda.build_masks(jdict, args.dim, args.k)
 
     plot_dgms(ax[0], jdict['barcodes'])
     plot_masks(ax[1], jdict['masks'])

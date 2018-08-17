@@ -1,6 +1,7 @@
 from args import DIMS, DIM, DIR
 from ripser import ripser
 from mnist import MNIST
+from functools import partial
 #import persim, umap
 import numpy as np
 import warnings
@@ -32,14 +33,15 @@ def get_masks(data, dims=DIMS):
     D = {d : {c : fmap(R[c], d) for c in C} for d in dims}
     return {'keys' : C, 'data' : data, 'diagrams' : D, 'barcodes' : B} #, 'cocycles' : G}
 
-def to_mask(dgm, l=0.0, n=28*28):
-    return [dgm['t'] if i in dgm['cycles'] else l for i in range(n)]
+def to_mask(dgm, k=100, l=0.0, f=lambda x: x ** 2, n=28*28):
+    c = dgm['cycles'] if len(dgm['cycles']) < k else dgm['cycles'][:k]
+    return [f(dgm['t']) if i in dgm['cycles'][:k] else l for i in range(n)]
 
-def make_masks(dgm):
-    return np.vstack(map(to_mask, dgm)).reshape(-1,28,28)
+def make_masks(dgm, k=100, l=0.0, f=lambda x: x ** 2):
+    return np.vstack(map(lambda x: to_mask(x, k, l, f), dgm)).reshape(-1,28,28)
 
 def fmask(x):
     return np.sum(x, axis=0)
 
-def build_masks(jdict, dim=DIM):
-    return {c : make_masks(jdict['diagrams'][dim][c]) for c in jdict['keys']}
+def build_masks(jdict, dim=DIM, k=100, l=0.0, f=lambda x: x ** 2):
+    return {c : make_masks(jdict['diagrams'][dim][c], k ,l, f) for c in jdict['keys']}
