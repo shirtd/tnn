@@ -1,7 +1,7 @@
 from src.args import parser
 from src.plot import *
 import src.tda as tda
-import sys
+import sys, os
 
 def main(args, data='train'):
     sys.stdout.write('[ args ] ')
@@ -14,6 +14,8 @@ def main(args, data='train'):
 
     plot_dgms(ax[0], jdict['barcodes'])
     plot_masks(ax[1], jdict['masks'])
+    fig[0].savefig(os.path.join('plot','dgm.png'))
+    fig[1].savefig(os.path.join('plot','masks.png'))
     return jdict
 
 if __name__ == '__main__':
