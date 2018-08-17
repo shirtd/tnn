@@ -1,5 +1,4 @@
 from src.args import parser
-from src.plot import *
 import src.tda as tda
 from src.util import sprint
 from src.cnet import cnet
