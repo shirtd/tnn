@@ -121,6 +121,7 @@ def test(args, model, device, test_loader, epoch):
         epoch,
         test_loss,
         100. * correct / len(test_loader.dataset)))
+    return test_loss
 
 def cnet(args, train_data, test_data, masks):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
@@ -145,9 +146,10 @@ def cnet(args, train_data, test_data, masks):
     print(str(model)[5:-2])
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', verbose=True, cooldown=10)
 
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
-        test(args, model, device, test_loader, epoch)
+        scheduler.step(test(args, model, device, test_loader, epoch))
 
     return Net
