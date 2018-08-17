@@ -1,0 +1,9 @@
+Cython>=0.28.5
+numpy>=1.15.0
+scipy>=1.1.0
+torch>=0.4.1
+matplotlib>=2.2.3
+pandas>=0.23.4
+persim>=0.0.6
+python-mnist>=0.6
+ripser>=0.2.4
