@@ -159,10 +159,11 @@ def train(args, model, device, train_loader, optimizer, epoch):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
-        if batch_idx % args.log == 0:
-            sprint(2, '| {:.0f}%\tloss:\t{:.6f}'.format(
-                100. * batch_idx / len(train_loader),
-                loss.item()))
+        if args.verbose:
+            if batch_idx % args.log == 0:
+                sprint(2, '| {:.0f}%\tloss:\t{:.6f}'.format(
+                    100. * batch_idx / len(train_loader),
+                    loss.item()))
 
 def test(args, model, device, test_loader, epoch):
     model.eval()
@@ -179,8 +180,7 @@ def test(args, model, device, test_loader, epoch):
     test_loss /= len(test_loader.dataset)
     accuracy = float(100 * correct) / len(test_loader.dataset)
     sprint(1, '[ epoch {} test'.format(epoch))
-    sprint(4,'avg loss:\t{:.6f}'.format(test_loss))
-    sprint(4,'accuracy:\t{:.4f}%'.format(accuracy))
+    sprint(4,':\t{:.3f}\t{:.3f}%'.format(100./(1+test_loss), accuracy))
     return test_loss
 
 def cnet(args, masks):
@@ -203,7 +203,7 @@ def cnet(args, masks):
                     )), batch_size=args.test_batch, shuffle=True, **kwargs)
 
     model = TestNet(masks).to(device) if args.test else Net(masks).to(device)
-    print(str(model)[5:-2])
+    print(str(model)[:-2])
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', verbose=True, cooldown=10)
