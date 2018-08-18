@@ -5,13 +5,11 @@ from src.cnet import cnet
 import numpy as np
 import sys, os
 
-def main(args):
+def main(args, masks=None):
     sprint(0, '[ args ]')
     for k in sorted(args.__dict__.keys()):
         sprint(2, "({}): {}".format(k, args.__dict__[k]))
-    if args.no_mask:
-        masks = None
-    else:
+    if masks == None and not args.no_mask:
         train = tda.get_data('train', args.dir)
         test = tda.get_data('test', args.dir)
         sprint(1, '[ getting masks in dimension 0-%d' % args.dims)

@@ -141,7 +141,7 @@ def cnet(args, masks):
         train(args, model, device, train_loader, optimizer, epoch)
         scheduler.step(test(args, model, device, test_loader, epoch))
 
-    return Net
+    return model
 
 # class MaskDataset(torch.utils.data.Dataset):
 #     def __init__(self, X, y, masks, stats=None):
