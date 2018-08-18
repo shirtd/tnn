@@ -179,8 +179,8 @@ def test(args, model, device, test_loader, epoch):
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
-    accuracy = 100.000 * correct / float(len(test_loader.dataset))
-    sprint(1, '[ {} test\t{:.3f}\t{:.3f}%'.format(epoch, 100./(1+test_loss), accuracy))
+    accuracy = 100. * float(correct) / len(test_loader.dataset)
+    sprint(1, '[ {}\ttest\t{:.3f}\t{:.3f}%'.format(epoch, 100./(1+test_loss), accuracy))
     # sprint(2, '| {:.3f}\t{:.3f}%'.format())
     return test_loss
 
