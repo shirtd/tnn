@@ -5,7 +5,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from src.util import sprint
+from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
+from torchvision.datasets import MNIST
 
 class MaskTensor(object):#transforms.ToTensor):
     def __init__(self, masks):
@@ -16,25 +18,6 @@ class MaskTensor(object):#transforms.ToTensor):
         X = torch.stack([m * x for m in self.masks], 0).view(len(self.masks), 28, 28)
         # y = torch.from_numpy(np.array(labels, dtype=np.int64))
         return X#, y
-
-# class MaskDataset(torch.utils.data.Dataset):
-#     def __init__(self, X, y, masks, stats=None):
-#         self.data, self.gt = X, y
-#         self.masks = masks
-#         if stats != None:
-#             self.mean, self.std  = stats
-#         else:
-#             sprint(2, '| calculating mean and deviation')
-#             self.mean = np.mean(self.data, axis=0)
-#             self.std = np.std(self.data, axis=0, ddof=0)
-#         self.data = (self.data - self.mean) / self.std
-#         self.trans = MaskTensor()#self.masks)
-#
-#     def __getitem__(self, idx):
-#         return self.trans({'data' : self.data[idx], 'labels' : self.gt[idx]})
-#
-#     def __len__(self):
-#         return len(self.gt)
 
 class Net(nn.Module):
     def __init__(self, n0, n=10):
@@ -117,10 +100,10 @@ def test(args, model, device, test_loader, epoch):
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
-    sprint(1, '[ epoch {} test\n\tloss:\t{:.6f}\n    accuracy:\t{:.4f}%\n'.format(
-        epoch,
-        test_loss,
-        100. * correct / len(test_loader.dataset)))
+    accuracy = (100. * correct) / len(test_loader.dataset)
+    sprint(1, '[ epoch {} test'.format(epoch))
+    sprint(4,'avg loss:\t{:.6f}'.format(test_loss))
+    sprint(4,'accuracy:\t{:.4f}%'.format(accuracy))
     return test_loss
 
 def cnet(args, train_data, test_data, masks):
@@ -129,14 +112,14 @@ def cnet(args, train_data, test_data, masks):
     device = torch.device("cuda" if use_cuda else "cpu")
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
-    train_loader = torch.utils.data.DataLoader(datasets.MNIST('../data',
-                    train=True, download=True, transform=transforms.Compose([
+    train_loader = DataLoader(MNIST('../data', train=True, download=True,
+                    transform=transforms.Compose([
                         transforms.ToTensor(),
                         transforms.Normalize((0.1307,), (0.3081,)),
                         MaskTensor(masks)
                     ])), batch_size=args.batch, shuffle=True, **kwargs)
-    test_loader = torch.utils.data.DataLoader(datasets.MNIST('../data',
-                    train=False, transform=transforms.Compose([
+    test_loader = DataLoader(MNIST('../data', train=False,
+                    transform = transforms.Compose([
                         transforms.ToTensor(),
                         transforms.Normalize((0.1307,), (0.3081,)),
                         MaskTensor(masks)
@@ -153,3 +136,22 @@ def cnet(args, train_data, test_data, masks):
         scheduler.step(test(args, model, device, test_loader, epoch))
 
     return Net
+
+# class MaskDataset(torch.utils.data.Dataset):
+#     def __init__(self, X, y, masks, stats=None):
+#         self.data, self.gt = X, y
+#         self.masks = masks
+#         if stats != None:
+#             self.mean, self.std  = stats
+#         else:
+#             sprint(2, '| calculating mean and deviation')
+#             self.mean = np.mean(self.data, axis=0)
+#             self.std = np.std(self.data, axis=0, ddof=0)
+#         self.data = (self.data - self.mean) / self.std
+#         self.trans = MaskTensor()#self.masks)
+#
+#     def __getitem__(self, idx):
+#         return self.trans({'data' : self.data[idx], 'labels' : self.gt[idx]})
+#
+#     def __len__(self):
+#         return len(self.gt)
