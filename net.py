@@ -22,7 +22,7 @@ def main(args, masks=[], jdict = {}, l=100, f=lambda x: x):
         else:
             masks = [tda.fmask(jdict['masks'][c]) for c in jdict['keys']]
     # return masks
-    sprint(0, '[ model ]')
+    sys.stdout.write('[ model ')
     jdict['net'] = cnet(args, masks)
     return jdict
 

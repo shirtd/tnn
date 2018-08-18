@@ -151,7 +151,8 @@ class Net(nn.Module):
 
 def train(args, model, device, train_loader, optimizer, epoch):
     model.train()
-    sprint(1, '[ epoch %d train' % epoch)
+    if args.verbose:
+        sprint(1, '[ %d train' % epoch)
     for batch_idx, (data, target) in enumerate(train_loader):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
@@ -178,9 +179,9 @@ def test(args, model, device, test_loader, epoch):
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
-    accuracy = float(100 * correct) / len(test_loader.dataset)
-    sprint(1, '[ epoch {} test'.format(epoch))
-    sprint(4,':\t{:.3f}\t{:.3f}%'.format(100./(1+test_loss), accuracy))
+    accuracy = 100.000 * correct / float(len(test_loader.dataset))
+    sprint(1, '[ {} test\t{:.3f}\t{:.3f}%'.format(epoch, 100./(1+test_loss), accuracy))
+    # sprint(2, '| {:.3f}\t{:.3f}%'.format())
     return test_loss
 
 def cnet(args, masks):
