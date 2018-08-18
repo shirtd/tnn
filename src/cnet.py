@@ -24,6 +24,77 @@ class MaskTensor(object):#transforms.ToTensor):
         # y = torch.from_numpy(np.array(labels, dtype=np.int64))
         return X#, y
 
+class TestTensor(object):#transforms.ToTensor):
+    def __init__(self, masks):
+        super(TestTensor, self).__init__()
+        # self.masks = torch.from_numpy(masks).float()
+        self.masks = torch.from_numpy(masks).float()
+        # if len(masks) > 0:
+        # else:
+        #     self.masks =
+    def __call__(self, sample):
+        # if self.masks == None:
+        if len(self.masks) == 0:
+            return sample
+        x = sample.view(28, 28)
+        X = torch.stack([m * x for m in self.masks], 0).view(10, -1, 28, 28)
+        # y = torch.from_numpy(np.array(labels, dtype=np.int64))
+        return X#, y
+
+class TestNet(nn.Module):
+    def __init__(self, masks, n=10):
+        super(TestNet, self).__init__()
+        ''' in/out '''
+        self.n0 = 1 if len(masks) == 0 else len(masks)
+        self.n = n
+        ''' neurons '''
+        # convolution
+        self.n1 = self.n0 * 10
+        self.n2 = self.n0 * 20
+        self.k1, self.k2 = 5, 5
+        # connected
+        self.n3 = self.n0 * 320
+        self.n4 = self.n0 * 50
+        self.n5 = self.n0 * 10
+
+        ''' layers '''
+        # convolution
+        self.conv1 = nn.Conv3d(self.n0, self.n1, self.k1)
+        self.conv2 = nn.Conv3d(self.n1, self.n2, self.k2)
+        self.conv2_drop = nn.Dropout3d()
+        # connected
+        self.fc1 = nn.Linear(self.n3, self.n4)
+        self.fc2 = nn.Linear(self.n4, self.n5)
+        self.fc3 = nn.Linear(self.n5, self.n)
+
+    def view(self, x):
+        return x.view(-1, self.n3)
+
+    def forward(self, x):
+        ''' convolution '''
+        # in -> conv1
+        x = self.conv1(x)
+        x = F.max_pool3d(x, 2)
+        x = F.relu(x)
+        # conv1 -> conv2
+        x = self.conv2(x)
+        x = self.conv2_drop(x)
+        x = F.max_pool3d(x, 2)
+        x = F.relu(x)
+
+        ''' connected '''
+        x = self.view(x)
+        # conv2 -> linear1
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = F.dropout(x, training=self.training)
+        # linear1 -> linear2
+        x = self.fc2(x)
+        x = F.relu(x)
+        # linear2 -> linear3 (out)
+        x = self.fc3(x)
+        return F.log_softmax(x, dim=1)
+
 class Net(nn.Module):
     def __init__(self, masks, n=10):
         super(Net, self).__init__()
@@ -106,7 +177,7 @@ def test(args, model, device, test_loader, epoch):
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
-    accuracy = (100. * correct) / len(test_loader.dataset)
+    accuracy = float(100 * correct) / len(test_loader.dataset)
     sprint(1, '[ epoch {} test'.format(epoch))
     sprint(4,'avg loss:\t{:.6f}'.format(test_loss))
     sprint(4,'accuracy:\t{:.4f}%'.format(accuracy))
@@ -122,16 +193,16 @@ def cnet(args, masks):
                     transform = transforms.Compose([
                         transforms.ToTensor(),
                         transforms.Normalize((0.1307,), (0.3081,)),
-                        MaskTensor(masks)]
+                        TestTensor(masks) if args.test else MaskTensor(masks)]
                     )), batch_size=args.batch, shuffle=True, **kwargs)
     test_loader = DataLoader(MNIST('../data', train=False,
                     transform = transforms.Compose([
                         transforms.ToTensor(),
                         transforms.Normalize((0.1307,), (0.3081,)),
-                        MaskTensor(masks)]
+                        TestTensor(masks) if args.test else MaskTensor(masks)]
                     )), batch_size=args.test_batch, shuffle=True, **kwargs)
 
-    model = Net(masks).to(device)
+    model = TestNet(masks).to(device) if args.test else Net(masks).to(device)
     print(str(model)[5:-2])
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)

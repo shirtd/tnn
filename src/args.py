@@ -18,6 +18,7 @@ parser.add_argument('--momentum', type=float, default=0.5, metavar='M', help='SG
 parser.add_argument('--no-cuda', action='store_true', default=False, help='disables CUDA training')
 parser.add_argument('--log', type=int, default=250, metavar='N', help='how many batches to wait before logging training status')
 parser.add_argument('--no-mask', action='store_true', default=False, help='no masks')
+parser.add_argument('--test', action='store_true', default=False, help='test 3d convolution')
 # parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
 # parser.add_argument('-t', '--transpose', action='store_false', help='sample space persistence (no transpose)')
 # parser.add_argument('-','--dims', type=int, nargs='+', default=[0,1], help='')
