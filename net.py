@@ -5,7 +5,7 @@ from src.cnet import cnet
 import numpy as np
 import sys, os
 
-def main(args, masks=None):
+def main(args, masks=None, jdict = {}):
     sprint(0, '[ args ]')
     for k in sorted(args.__dict__.keys()):
         sprint(2, "({}): {}".format(k, args.__dict__[k]))
@@ -18,7 +18,7 @@ def main(args, masks=None):
         jdict['masks'] = tda.build_masks(jdict, args.dim, args.k)
         masks = [tda.fmask(jdict['masks'][c]) for c in jdict['keys']]
     sprint(0, '[ model ]')
-    net = cnet(args, masks)
+    jdict['net'] = cnet(args, masks)
     return jdict
 
 if __name__ == '__main__':
