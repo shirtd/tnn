@@ -12,18 +12,24 @@ from torchvision.datasets import MNIST
 class MaskTensor(object):#transforms.ToTensor):
     def __init__(self, masks):
         super(MaskTensor, self).__init__()
-        self.masks = [torch.from_numpy(m).float() for m in masks]
+        if masks != None:
+            self.masks = [torch.from_numpy(m).float() for m in masks]
+        else:
+            self.masks = None
     def __call__(self, sample):
+        if self.masks == None:
+            return sample
         x = sample.view(28, 28)
         X = torch.stack([m * x for m in self.masks], 0).view(len(self.masks), 28, 28)
         # y = torch.from_numpy(np.array(labels, dtype=np.int64))
         return X#, y
 
 class Net(nn.Module):
-    def __init__(self, n0, n=10):
+    def __init__(self, masks, n=10):
         super(Net, self).__init__()
-        self.n0 = n0 # in
-        self.n = n   # out
+        ''' in/out '''
+        self.n0 = 1 if masks == None else len(masks)
+        self.n = n
         ''' neurons '''
         # convolution
         self.n1 = self.n0 * 10
@@ -106,26 +112,26 @@ def test(args, model, device, test_loader, epoch):
     sprint(4,'accuracy:\t{:.4f}%'.format(accuracy))
     return test_loss
 
-def cnet(args, train_data, test_data, masks):
+def cnet(args, masks):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     # torch.manual_seed(args.seed)
     device = torch.device("cuda" if use_cuda else "cpu")
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     train_loader = DataLoader(MNIST('../data', train=True, download=True,
-                    transform=transforms.Compose([
+                    transform = transforms.Compose([
                         transforms.ToTensor(),
                         transforms.Normalize((0.1307,), (0.3081,)),
-                        MaskTensor(masks)
-                    ])), batch_size=args.batch, shuffle=True, **kwargs)
+                        MaskTensor(masks)]
+                    )), batch_size=args.batch, shuffle=True, **kwargs)
     test_loader = DataLoader(MNIST('../data', train=False,
                     transform = transforms.Compose([
                         transforms.ToTensor(),
                         transforms.Normalize((0.1307,), (0.3081,)),
-                        MaskTensor(masks)
-                    ])), batch_size=args.test_batch, shuffle=True, **kwargs)
+                        MaskTensor(masks)]
+                    )), batch_size=args.test_batch, shuffle=True, **kwargs)
 
-    model = Net(len(masks)).to(device)
+    model = Net(masks).to(device)
     print(str(model)[5:-2])
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
