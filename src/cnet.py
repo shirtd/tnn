@@ -68,7 +68,7 @@ class TestNet(nn.Module):
         self.fc3 = nn.Linear(self.n5, self.n)
 
     def view(self, x):
-        return x.view(-1, self.n3)
+        return x.view(-1, self.n3 * 22)
 
     def forward(self, x):
         ''' convolution '''
