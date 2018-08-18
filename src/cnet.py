@@ -53,9 +53,9 @@ class TestNet(nn.Module):
         self.n2 = self.n0 * 20
         self.k1, self.k2 = 5, 5
         # connected
-        self.n3 = self.n0 * 320
-        self.n4 = self.n0 * 50
-        self.n5 = self.n0 * 10
+        self.n3 = self.n0 * 320 * 22
+        self.n4 = self.n0 * 50 * 11
+        self.n5 = self.n0 * 10 * 3
 
         ''' layers '''
         # convolution
@@ -68,7 +68,7 @@ class TestNet(nn.Module):
         self.fc3 = nn.Linear(self.n5, self.n)
 
     def view(self, x):
-        return x.view(-1, self.n3 * 22)
+        return x.view(-1, self.n3)
 
     def forward(self, x):
         ''' convolution '''
