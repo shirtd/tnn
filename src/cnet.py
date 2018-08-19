@@ -216,7 +216,7 @@ def test(args, model, device, test_loader, epoch):
     test_loss /= len(test_loader.dataset)
     accuracy = float(100. * correct) / float(len(test_loader.dataset))
     score = 100 / (1 + log_loss(y, dfp.values, eps=1E-15))
-    sprint(1, '[ {} test\t{:.5f}\t{:.4f}\t{:.2f}%'.format(epoch, test_loss, score, accuracy))
+    sprint(1, '[ {}\ttest\t{:.5f}\t{:.4f}\t{:.2f}%'.format(epoch, test_loss, score, accuracy))
     # sprint(2, '| {:.3f}\t{:.3f}%'.format())
     return test_loss
 
