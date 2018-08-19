@@ -9,6 +9,9 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from torchvision.datasets import MNIST
 
+def pad(k):
+    return int(np.ceil(float(k) / 2))
+
 class MaskTensor(object):#transforms.ToTensor):
     def __init__(self, masks):
         super(MaskTensor, self).__init__()
@@ -54,6 +57,10 @@ class TestNet(nn.Module):
         self.n1 = self.n0 * 10
         self.n2 = self.n0 * 20
         self.k1, self.k2 = 5, 5
+        self.s1, self.s2 = 1, 1
+        self.p1 = pad(self.k1)
+        self.p2 = pad(self.k2)
+
         # connected
         self.n3 = self.n0 * 320 * 22
         self.n4 = self.n0 * 50 * 11
@@ -61,8 +68,8 @@ class TestNet(nn.Module):
 
         ''' layers '''
         # convolution
-        self.conv1 = nn.Conv3d(self.n0, self.n1, self.k1)
-        self.conv2 = nn.Conv3d(self.n1, self.n2, self.k2)
+        self.conv1 = nn.Conv3d(self.n0, self.n1, self.k1, self.s1, self.p1)
+        self.conv2 = nn.Conv3d(self.n1, self.n2, self.k2, self.s2, self.p2)
         self.conv2_drop = nn.Dropout3d()
         # connected
         self.fc1 = nn.Linear(self.n3, self.n4)

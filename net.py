@@ -14,7 +14,7 @@ def main(args, masks=[], jdict = {}):
     if len(masks) == 0 and not args.no_mask:
         fin = os.path.join(args.data, args.load)
         if not args.save and len(args.load) > 0 and os.path.exists(fin):
-            sprint(1, ' [ loading %s' % fin)
+            sprint(0, ' [ loading %s' % fin)
             with open(fin, 'r') as f:
                 jdict = pkl.load(f)
         else:
