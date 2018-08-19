@@ -247,6 +247,7 @@ def cnet(args, masks):
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', verbose=True,
                                                 factor=0.05, cooldown=5, patience=10)
 
+    print('[epoch\tmode\tloss\tscore\taccuracy')
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
         scheduler.step(test(args, model, device, test_loader, epoch))
