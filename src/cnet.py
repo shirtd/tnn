@@ -62,7 +62,7 @@ class TestNet(nn.Module):
         self.s1, self.s2 = 1, 1
         self.p1 = self.k1 / 2
         self.p2 = self.k2 / 2
-        self.r1, self.r2 = 4, 2
+        self.r1, self.r2 = 4, 4
 
         # # connected
         # self.n3 = self.k * self.n0 * 320
