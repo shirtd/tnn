@@ -47,9 +47,11 @@ class TestTensor(object):#transforms.ToTensor):
         return X#, y
 
 class TestNet(nn.Module):
-    def __init__(self, masks, n=10, dim=28):
+    def __init__(self, masks, k,  n=10, dim=28):
         super(TestNet, self).__init__()
         ''' in/out '''
+        self.k = k
+        self.dim = dim
         self.n0 = 1 if len(masks) == 0 else len(masks)
         self.n = n
         ''' neurons '''
@@ -60,12 +62,12 @@ class TestNet(nn.Module):
         self.s1, self.s2 = 1, 1
         self.p1 = self.k1 / 2
         self.p2 = self.k2 / 2
-        self.r1, self.r2 = 2, 2
+        self.r1, self.r2 = 3, 3
 
         # connected
-        self.n3 = self.n0 * 320 * 2*(dim * self.r1)
-        self.n4 = self.n0 * 50 * 11
-        self.n5 = self.n0 * 10 * 3
+        self.n3 = self.k * self.n0 * 320
+        self.n4 = self.k * self.n0 * 50 * 11
+        self.n5 = self.k * self.n0 * 10 * 3
 
         ''' layers '''
         # convolution
@@ -216,7 +218,7 @@ def cnet(args, masks):
                         TestTensor(masks) if args.test else MaskTensor(masks)]
                     )), batch_size=args.test_batch, shuffle=True, **kwargs)
 
-    model = TestNet(masks).to(device) if args.test else Net(masks).to(device)
+    model = TestNet(masks, args.k).to(device) if args.test else Net(masks).to(device)
     print(str(model)[:-2])
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
