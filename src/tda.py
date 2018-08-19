@@ -35,8 +35,8 @@ def get_masks(data, dims=DIMS):
     f = partial(persist, data, X)
     pool = Pool()
     R = dict(zip(C, pool.map(f, C)))
-    pool.join()
     pool.close()
+    pool.join()
     # R = {c : ripser(data['X'][X[c]].T, do_cocycles=True) for c in C}
     sprint(2, '| retrieving cocycles')
     B = {d : {c : R[c]['dgms'][d] for c in C} for d in dims}
