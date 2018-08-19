@@ -90,27 +90,27 @@ class TestNet(nn.Module):
     def forward(self, x):
         ''' convolution '''
         # in -> conv1
-        print(x.shape)
+        # print(x.shape)
         x = self.conv1(x)
-        print(x.shape)
+        # print(x.shape)
         x = F.max_pool3d(x, self.r1)
-        print(x.shape)
+        # print(x.shape)
         x = F.relu(x)
-        print()
+        # print()
 
         # conv1 -> conv2
         x = self.conv2(x)
-        print(x.shape)
+        # print(x.shape)
         x = self.conv2_drop(x)
         x = F.max_pool3d(x, self.r2)
-        print(x.shape)
+        # print(x.shape)
         x = F.relu(x)
-        print()
+        # print()
 
 
         ''' connected '''
         x = self.view(x)
-        print(x.shape)
+        # print(x.shape)
         # conv2 -> linear1
         x = self.fc1(x)
         x = F.relu(x)
