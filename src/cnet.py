@@ -58,16 +58,21 @@ class TestNet(nn.Module):
         # convolution
         self.n1 = self.n0 * 10
         self.n2 = self.n0 * 20
-        self.k1, self.k2 = 5, 5
+        self.k1, self.k2 = (5,5,2), (5,5,2)
         self.s1, self.s2 = 1, 1
         self.p1 = self.k1 / 2
         self.p2 = self.k2 / 2
-        self.r1, self.r2 = 3, 3
+        self.r1, self.r2 = 2, 2
+
+        # # connected
+        # self.n3 = self.k * self.n0 * 320
+        # self.n4 = self.k * self.n0 * 50 * 11
+        # self.n5 = self.k * self.n0 * 10 * 3
 
         # connected
-        self.n3 = self.k * self.n0 * 320
-        self.n4 = self.k * self.n0 * 50 * 11
-        self.n5 = self.k * self.n0 * 10 * 3
+        self.n3 = self.n0 * 320
+        self.n4 = self.n0 * 50 * 11
+        self.n5 = self.n0 * 10 * 3
 
         ''' layers '''
         # convolution
