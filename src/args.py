@@ -1,6 +1,6 @@
 import argparse
 
-K = 16
+K = 8
 DIMS = 1
 DIM = DIMS
 PLOT = 'plot'
