@@ -70,9 +70,9 @@ class TestNet(nn.Module):
         # self.n5 = self.k * self.n0 * 10 * 3
 
         # connected
-        self.n3 = self.n0 * 320
-        self.n4 = self.n0 * 50 * 11
-        self.n5 = self.n0 * 10 * 3
+        self.n3 = self.n0 * 320 * 16
+        self.n4 = self.n0 * 50 * 8
+        self.n5 = self.n0 * 10 * 4
 
         ''' layers '''
         # convolution
