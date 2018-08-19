@@ -76,8 +76,8 @@ class TestNet(nn.Module):
 
         ''' layers '''
         # convolution
-        self.conv1 = nn.Conv3d(self.n0, self.n1, self.k1, self.s1, self.p1)
-        self.conv2 = nn.Conv3d(self.n1, self.n2, self.k2, self.s2, self.p2)
+        self.conv1 = nn.Conv3d(self.n0, self.n1, self.k1, self.s1, self.p1, groups=self.n0)
+        self.conv2 = nn.Conv3d(self.n1, self.n2, self.k2, self.s2, self.p2, groups=self.n0)
         self.conv2_drop = nn.Dropout3d()
         # connected
         self.fc1 = nn.Linear(self.n3, self.n4)
