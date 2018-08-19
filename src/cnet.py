@@ -214,7 +214,7 @@ def test(args, model, device, test_loader, epoch):
     test_loss /= len(test_loader.dataset)
     accuracy = float(100. * correct) / float(len(test_loader.dataset))
     score = 100 / (1 + log_loss(y, dfp.values, eps=1E-15))
-    sprint(1, '[ {}\ttest\t{:.4f}\t{:.2f}\t{:.4f}'.format(epoch, test_loss, accuracy, score))
+    sprint(1, '[ {}\ttest\t{:.4f}\t{:.4f}\t{:.2f}%'.format(epoch, test_loss, score, accuracy))
     # sprint(2, '| {:.3f}\t{:.3f}%'.format())
     return test_loss
 
@@ -242,7 +242,7 @@ def cnet(args, masks):
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer,
-                    'min', verbose=True, cooldown=5, patience=5)
+                    'min', verbose=True, cooldown=5, patience=10)
 
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
