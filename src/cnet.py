@@ -47,7 +47,7 @@ class TestTensor(object):#transforms.ToTensor):
         return X#, y
 
 class TestNet(nn.Module):
-    def __init__(self, masks, n=10):
+    def __init__(self, masks, n=10, dim=28):
         super(TestNet, self).__init__()
         ''' in/out '''
         self.n0 = 1 if len(masks) == 0 else len(masks)
@@ -59,10 +59,11 @@ class TestNet(nn.Module):
         self.k1, self.k2 = 5, 5
         self.s1, self.s2 = 1, 1
         self.p1 = self.k1 / 2
-        self.p2 = self.k2 / 2 
+        self.p2 = self.k2 / 2
+        self.r1, self.r2 = 2, 2
 
         # connected
-        self.n3 = self.n0 * 320 * 22
+        self.n3 = self.n0 * 320 * 2*(dim * self.r1)
         self.n4 = self.n0 * 50 * 11
         self.n5 = self.n0 * 10 * 3
 
@@ -85,13 +86,13 @@ class TestNet(nn.Module):
         print(x.shape)
         x = self.conv1(x)
         print(x.shape)
-        x = F.max_pool3d(x, 2)
+        x = F.max_pool3d(x, self.r1)
         print(x.shape)
         x = F.relu(x)
         # conv1 -> conv2
         x = self.conv2(x)
         x = self.conv2_drop(x)
-        x = F.max_pool3d(x, 2)
+        x = F.max_pool3d(x, self.r2)
         x = F.relu(x)
 
         ''' connected '''
