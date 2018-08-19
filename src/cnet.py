@@ -226,6 +226,7 @@ def cnet(args, masks):
     device = torch.device("cuda" if use_cuda else "cpu")
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+
     train_loader = DataLoader(MNIST('../data', train=True, download=True,
                     transform = transforms.Compose([
                         transforms.ToTensor(),
@@ -243,8 +244,8 @@ def cnet(args, masks):
     print(str(model)[:-2])
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer,
-                    'min', verbose=True, cooldown=5, patience=10)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', verbose=True,
+                                                factor=0.05, cooldown=5, patience=10)
 
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
