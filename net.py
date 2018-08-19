@@ -8,9 +8,10 @@ import numpy as np
 import sys, os
 
 def main(args, masks=[], jdict = {}):
-    sprint(0, '[ args ]')
-    for k in sorted(args.__dict__.keys()):
-        sprint(2, "({}): {}".format(k, args.__dict__[k]))
+    if args.verbose:
+        sprint(0, '[ args ]')
+        for k in sorted(args.__dict__.keys()):
+            sprint(2, "({}): {}".format(k, args.__dict__[k]))
     if len(masks) == 0 and not args.no_mask:
         fin = os.path.join(args.data, args.load + '%d.pkl' % args.k)
         if not args.save and os.path.exists(fin) and len(args.load) > 0:
