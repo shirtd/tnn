@@ -11,13 +11,14 @@ from torchvision.datasets import MNIST
 from sklearn.metrics import *
 import pandas as pd
 
+''' UTIL '''
 def pad(k):
     return int(np.floor(float(k) / 2))
 
-class MaskTensor(object):#transforms.ToTensor):
+''' DEFAULT '''
+class MaskTensor(object):
     def __init__(self, masks):
         super(MaskTensor, self).__init__()
-        # if masks != None:
         if len(masks) > 0:
             self.masks = [torch.from_numpy(m).float() for m in masks]
         else:
@@ -27,103 +28,7 @@ class MaskTensor(object):#transforms.ToTensor):
             return sample
         x = sample.view(28, 28)
         X = torch.stack([m * x for m in self.masks], 0).view(len(self.masks), 28, 28)
-        # y = torch.from_numpy(np.array(labels, dtype=np.int64))
-        return X#, y
-
-class TestTensor(object):#transforms.ToTensor):
-    def __init__(self, masks):
-        super(TestTensor, self).__init__()
-        # self.masks = torch.from_numpy(masks).float()
-        self.masks = torch.from_numpy(masks).float()
-        # if len(masks) > 0:
-        # else:
-        #     self.masks =
-    def __call__(self, sample):
-        # if self.masks == None:
-        if len(self.masks) == 0:
-            return sample
-        x = sample.view(28, 28)
-        X = torch.stack([m * x for m in self.masks], 0)
-        # X = X.view(10, -1, 28, 28)
-        # print(X.shape)
-        # y = torch.from_numpy(np.array(labels, dtype=np.int64))
-        return X#, y
-
-class TestNet(nn.Module):
-    def __init__(self, masks, k,  n=10, dim=28):
-        super(TestNet, self).__init__()
-        ''' in/out '''
-        self.k = k
-        self.dim = dim
-        self.n0 = 1 if len(masks) == 0 else len(masks)
-        self.n = n
-        ''' neurons '''
-        # convolution
-        self.n1 = self.n0 * 10
-        self.n2 = self.n0 * 20
-        self.k1, self.k2 = 4, 4
-        self.s1, self.s2 = 2, 2
-        self.p1 = self.k1 / 2
-        self.p2 = self.k2 / 2
-        self.r1, self.r2 = 2, 2
-
-        # # connected
-        # self.n3 = self.k * self.n0 * 320
-        # self.n4 = self.k * self.n0 * 50 * 11
-        # self.n5 = self.k * self.n0 * 10 * 3
-
-        # connected
-        self.n3 = self.n0 * 160 * dim / k
-        self.n4 = self.n0 * 110 * dim / k
-        self.n5 = self.n0 * 50 * dim / k
-
-        ''' layers '''
-        # convolution
-        self.conv1 = nn.Conv3d(self.n0, self.n1, self.k1, self.s1, self.p1, groups=self.n0)
-        self.conv2 = nn.Conv3d(self.n1, self.n2, self.k2, self.s2, self.p2)#, groups=self.n0)
-        self.conv2_drop = nn.Dropout3d()
-        # connected
-        self.fc1 = nn.Linear(self.n3, self.n4)
-        self.fc2 = nn.Linear(self.n4, self.n5)
-        self.fc3 = nn.Linear(self.n5, self.n)
-
-    def view(self, x):
-        return x.view(-1, self.n3)
-
-    def forward(self, x):
-        ''' convolution '''
-        # in -> conv1
-        # print(x.shape)
-        x = self.conv1(x)
-        # print(x.shape)
-        x = F.max_pool3d(x, self.r1)
-        # print(x.shape)
-        x = F.relu(x)
-        # print()
-
-        # conv1 -> conv2
-        x = self.conv2(x)
-        # print(x.shape)
-        x = self.conv2_drop(x)
-        x = F.max_pool3d(x, self.r2)
-        # print(x.shape)
-        x = F.relu(x)
-        # print()
-
-
-        ''' connected '''
-        x = self.view(x)
-        # print(x.shape)
-        # conv2 -> linear1
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = F.dropout(x, training=self.training)
-        # linear1 -> linear2
-        x = self.fc2(x)
-        x = F.relu(x)
-        # linear2 -> linear3 (out)
-        x = self.fc3(x)
-        return F.log_softmax(x, dim=1)
+        return X
 
 class Net(nn.Module):
     def __init__(self, masks, n=10):
@@ -180,6 +85,91 @@ class Net(nn.Module):
         x = self.fc3(x)
         return F.log_softmax(x, dim=1)
 
+''' TEST '''
+class TestTensor(object):
+    def __init__(self, masks):
+        super(TestTensor, self).__init__()
+        self.masks = torch.from_numpy(masks).float()
+    def __call__(self, sample):
+        if len(self.masks) == 0:
+            return sample
+        x = sample.view(28, 28)
+        X = torch.stack([m * x for m in self.masks], 0)
+        return X
+
+class TestNet(nn.Module):
+    def __init__(self, masks, k,  n=10, dim=28):
+        super(TestNet, self).__init__()
+        ''' in/out '''
+        self.k = k
+        self.dim = dim
+        self.n0 = 1 if len(masks) == 0 else len(masks)
+        self.n = n
+        ''' neurons '''
+        # convolution
+        self.n1 = self.n0 * 10
+        self.n2 = self.n0 * 20
+        self.k1, self.k2 = 4, 4
+        self.s1, self.s2 = 2, 2
+        self.p1 = self.k1 / 2
+        self.p2 = self.k2 / 2
+        self.r1, self.r2 = 2, 2
+
+        # connected
+        self.n3 = self.n0 * 160 * dim / k
+        self.n4 = self.n0 * 110 * dim / k
+        self.n5 = self.n0 * 50 * dim / k
+
+        ''' layers '''
+        # convolution
+        self.conv1 = nn.Conv3d(self.n0, self.n1, self.k1, self.s1, self.p1, groups=self.n0)
+        self.conv2 = nn.Conv3d(self.n1, self.n2, self.k2, self.s2, self.p2)#, groups=self.n0)
+        self.conv2_drop = nn.Dropout3d()
+        # connected
+        self.fc1 = nn.Linear(self.n3, self.n4)
+        self.fc2 = nn.Linear(self.n4, self.n5)
+        self.fc3 = nn.Linear(self.n5, self.n)
+
+    def view(self, x):
+        return x.view(-1, self.n3)
+
+    def forward(self, x):
+        ''' convolution '''
+        # in -> conv1
+        # print(x.shape)
+        x = self.conv1(x)
+        # print(x.shape)
+        x = F.max_pool3d(x, self.r1)
+        # print(x.shape)
+        x = F.relu(x)
+        # print()
+
+        # conv1 -> conv2
+        x = self.conv2(x)
+        # print(x.shape)
+        x = self.conv2_drop(x)
+        x = F.max_pool3d(x, self.r2)
+        # print(x.shape)
+        x = F.relu(x)
+        # print()
+
+
+        ''' connected '''
+        x = self.view(x)
+        # print(x.shape)
+        # conv2 -> linear1
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = F.dropout(x, training=self.training)
+        # linear1 -> linear2
+        x = self.fc2(x)
+        x = F.relu(x)
+        # linear2 -> linear3 (out)
+        x = self.fc3(x)
+        return F.log_softmax(x, dim=1)
+
+
+''' RUN TRAIN '''
 def train(args, model, device, train_loader, optimizer, epoch):
     model.train()
     if args.verbose:
@@ -197,6 +187,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
                     100. * batch_idx / len(train_loader),
                     loss.item()))
 
+''' RUN TEST '''
 def test(args, model, device, test_loader, epoch):
     model.eval()
     test_loss = 0
@@ -217,12 +208,11 @@ def test(args, model, device, test_loader, epoch):
     accuracy = float(100. * correct) / float(len(test_loader.dataset))
     score = 100 / (1 + log_loss(y, dfp.values, eps=1E-15))
     sprint(1, '[ {}\ttest\t{:.5f}\t{:.4f}\t{:.2f}%'.format(epoch, test_loss, score, accuracy))
-    # sprint(2, '| {:.3f}\t{:.3f}%'.format())
     return test_loss
 
+''' RUN '''
 def cnet(args, masks):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
-    # torch.manual_seed(args.seed)
     device = torch.device("cuda" if use_cuda else "cpu")
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
@@ -253,22 +243,3 @@ def cnet(args, masks):
         scheduler.step(test(args, model, device, test_loader, epoch))
 
     return model
-
-# class MaskDataset(torch.utils.data.Dataset):
-#     def __init__(self, X, y, masks, stats=None):
-#         self.data, self.gt = X, y
-#         self.masks = masks
-#         if stats != None:
-#             self.mean, self.std  = stats
-#         else:
-#             sprint(2, '| calculating mean and deviation')
-#             self.mean = np.mean(self.data, axis=0)
-#             self.std = np.std(self.data, axis=0, ddof=0)
-#         self.data = (self.data - self.mean) / self.std
-#         self.trans = MaskTensor()#self.masks)
-#
-#     def __getitem__(self, idx):
-#         return self.trans({'data' : self.data[idx], 'labels' : self.gt[idx]})
-#
-#     def __len__(self):
-#         return len(self.gt)

@@ -13,7 +13,6 @@ def main(args, masks=[], jdict = {}):
         for k in sorted(args.__dict__.keys()):
             sprint(2, "({}): {}".format(k, args.__dict__[k]))
     if len(masks) == 0 and not args.no_mask:
-        # fin = os.path.join(args.data, args.load + '%d.pkl' % args.k)
         fin = os.path.join(args.data, args.load + '.pkl')
         if not args.save and os.path.exists(fin) and len(args.load) > 0:
             sprint(1, '[ loading %s' % fin)
@@ -30,7 +29,6 @@ def main(args, masks=[], jdict = {}):
                 if not os.path.exists(args.data):
                     sprint(2, '! creating directory %s' % args.data)
                     os.mkdir(args.data)
-                # fout = os.path.join(args.data, args.fout + '%d.pkl' % args.k)
                 fout = os.path.join(args.data, args.fout + '.pkl')
                 sprint(2, '| writing to %s' % fout)
                 with open(fout, 'w') as f:
@@ -39,7 +37,6 @@ def main(args, masks=[], jdict = {}):
             mn = min(map(len, jdict['masks'].values()))
             l = args.k if args.k < mn else mn
             masks = np.array([jdict['masks'][c][:l] for c in jdict['keys']])
-            # print(masks.shape)
         else:
             masks = [fmask(jdict['masks'][c]) for c in jdict['keys']]
     else:
