@@ -13,7 +13,7 @@ def main(args, masks=[], jdict = {}):
         sprint(2, "({}): {}".format(k, args.__dict__[k]))
     if len(masks) == 0 and not args.no_mask:
         fin = os.path.join(args.data, args.load + '%d.pkl' % args.k)
-        if not args.save and len(args.load) > 0 and os.path.exists(fin):
+        if not args.save and os.path.exists(fin) and len(args.load) > 0:
             sprint(1, '[ loading %s' % fin)
             with open(fin, 'r') as f:
                 jdict = pkl.load(f)
@@ -39,6 +39,9 @@ def main(args, masks=[], jdict = {}):
             # print(masks.shape)
         else:
             masks = [fmask(jdict['masks'][c]) for c in jdict['keys']]
+    else:
+        train = get_data('train', args.dir)
+        test = get_data('test', args.dir)
     sys.stdout.write('[ model ')
     jdict['net'] = cnet(args, masks)
     return jdict
