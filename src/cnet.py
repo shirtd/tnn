@@ -98,12 +98,15 @@ class TestNet(nn.Module):
         x = F.relu(x)
         # conv1 -> conv2
         x = self.conv2(x)
+        print(x.shape)
         x = self.conv2_drop(x)
         x = F.max_pool3d(x, self.r2)
+        print(x.shape)
         x = F.relu(x)
 
         ''' connected '''
         x = self.view(x)
+        print(x.shape)
         # conv2 -> linear1
         x = self.fc1(x)
         x = F.relu(x)
