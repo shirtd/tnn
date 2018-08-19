@@ -18,7 +18,9 @@ def main(args, masks=[], jdict = {}, l=100, f=lambda x: x):
         jdict['masks'] = tda.build_masks(jdict, args.dim, args.k, f=f)
         if args.test:
             mn = min(map(len, jdict['masks'].values()))
-            masks = np.array([jdict['masks'][c][:l if l < mn else mn] for c in jdict['keys']])
+            l = l if l < mn else mn
+            print('length: %d' % l)
+            masks = np.array([jdict['masks'][c][:l] for c in jdict['keys']])
         else:
             masks = [tda.fmask(jdict['masks'][c]) for c in jdict['keys']]
     # return masks
