@@ -58,8 +58,8 @@ class TestNet(nn.Module):
         self.n2 = self.n0 * 20
         self.k1, self.k2 = 5, 5
         self.s1, self.s2 = 1, 1
-        self.p1 = pad(self.k1)
-        self.p2 = pad(self.k2)
+        self.p1 = self.k1 - 1
+        self.p2 = self.k2 - 1
 
         # connected
         self.n3 = self.n0 * 320 * 22
