@@ -1,17 +1,10 @@
 from args import DIMS, DIM, DIR
 from ripser import ripser
 from mnist import MNIST
-# from multiprocessing import Pool
-# from functools import partial
 from src.util import *
 #import persim, umap
 import numpy as np
 import warnings
-
-LOAD = {'train': lambda x: x.load_training(), 'test': lambda x: x.load_testing()}
-
-def get_data(key='train', dir=DIR):
-    return dict(zip(('X','y'), LOAD[key](MNIST(dir, return_type='numpy'))))
 
 def fdict(pc):
     b,d,c =  pc[0][0], pc[0][1], pc[1][:,:-1]
