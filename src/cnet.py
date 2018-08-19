@@ -218,17 +218,17 @@ def cnet(args, masks):
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
     train_loader = DataLoader(MNIST('../data', train=True, download=True,
-                    transform = transforms.Compose([
-                        transforms.ToTensor(),
-                        transforms.Normalize((0.1307,), (0.3081,)),
-                        TestTensor(masks) if args.test else MaskTensor(masks)]
-                    )), batch_size=args.batch, shuffle=True, **kwargs)
+                        transform = transforms.Compose([
+                            transforms.ToTensor(),
+                            transforms.Normalize((0.1307,), (0.3081,)),
+                            TestTensor(masks) if args.test else MaskTensor(masks)])),
+                    batch_size=args.batch, shuffle=True, **kwargs)
     test_loader = DataLoader(MNIST('../data', train=False,
-                    transform = transforms.Compose([
-                        transforms.ToTensor(),
-                        transforms.Normalize((0.1307,), (0.3081,)),
-                        TestTensor(masks) if args.test else MaskTensor(masks)]
-                    )), batch_size=args.test_batch, shuffle=True, **kwargs)
+                        transform = transforms.Compose([
+                            transforms.ToTensor(),
+                            transforms.Normalize((0.1307,), (0.3081,)),
+                            TestTensor(masks) if args.test else MaskTensor(masks)])),
+                    batch_size=args.test_batch, shuffle=True, **kwargs)
 
     model = TestNet(masks, args.k).to(device) if args.test else Net(masks).to(device)
     print(str(model)[:-2])
@@ -243,3 +243,16 @@ def cnet(args, masks):
         scheduler.step(test(args, model, device, test_loader, epoch))
 
     return model
+
+def get_load():
+    return DataLoader(MNIST('../data', train=True, download=True,
+                transform = transforms.Compose([transforms.ToTensor()])),
+            batch_size=1000, shuffle=False)
+
+def aload(load=get_load()):
+    p, l = [], []
+    for data, target in load:
+        p.append(data)
+        l.append(target)
+    p = torch.cat(p, 0).view(-1,28,28)
+    return p, torch.cat(l)
