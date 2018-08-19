@@ -8,6 +8,8 @@ from src.util import sprint
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from torchvision.datasets import MNIST
+from sklearn.metrics import *
+import pandas as pd
 
 def pad(k):
     return int(np.floor(float(k) / 2))
@@ -197,6 +199,7 @@ def test(args, model, device, test_loader, epoch):
     model.eval()
     test_loss = 0
     correct = 0
+    dfp, dfl = pd.DataFrame(), pd.DataFrame()
     with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
@@ -204,10 +207,14 @@ def test(args, model, device, test_loader, epoch):
             test_loss += F.nll_loss(output, target, reduction='sum').item() # sum up batch loss
             pred = output.max(1, keepdim=True)[1] # get the index of the max log-probability
             correct += pred.eq(target.view_as(pred)).sum().item()
+            dfp = dfp.append(pd.DataFrame(F.softmax(output,dim=1).tolist()), sort=False, ignore_index=True)
+            dfl = dfl.append(pd.DataFrame(target.tolist()), sort=False, ignore_index=True)
 
+    y = [l[0] for l in dfl.values]
     test_loss /= len(test_loader.dataset)
-    accuracy = float(100 * correct) / float(len(test_loader.dataset))
-    sprint(1, '[ {}\ttest\t{:.3f}\t{:.6f}'.format(epoch, 100./(1+test_loss), accuracy))
+    accuracy = float(100. * correct) / float(len(test_loader.dataset))
+    score = 100 / (1 + log_loss(y, dfp.values, eps=1E-15))
+    sprint(1, '[ {}\ttest\t{:.4f}\t{:.2f}\t{:.4f}'.format(epoch, test_loss, accuracy, score))
     # sprint(2, '| {:.3f}\t{:.3f}%'.format())
     return test_loss
 
