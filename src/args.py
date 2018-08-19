@@ -6,7 +6,7 @@ DIM = DIMS
 PLOT = 'plot'
 DATA = 'data'
 DIR = 'mnist'
-FOUT = DIR + '.pkl'
+FOUT = DIR
 
 parser = argparse.ArgumentParser(description='mnist persistence.')
 parser.add_argument('--dir', default=DIR, help='source data directory. default: %s' % DIR)
