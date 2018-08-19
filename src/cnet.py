@@ -17,7 +17,8 @@ def pad(k):
 class MaskTensor(object):#transforms.ToTensor):
     def __init__(self, masks):
         super(MaskTensor, self).__init__()
-        if masks != None:
+        # if masks != None:
+        if len(masks) > 0:
             self.masks = [torch.from_numpy(m).float() for m in masks]
         else:
             self.masks = None
@@ -128,7 +129,8 @@ class Net(nn.Module):
     def __init__(self, masks, n=10):
         super(Net, self).__init__()
         ''' in/out '''
-        self.n0 = 1 if masks == None else len(masks)
+        self.n0 = len(masks) if len(masks) > 0 else 1
+        # self.n0 = 1 if masks == None else len(masks)
         self.n = n
         ''' neurons '''
         # convolution
@@ -214,7 +216,7 @@ def test(args, model, device, test_loader, epoch):
     test_loss /= len(test_loader.dataset)
     accuracy = float(100. * correct) / float(len(test_loader.dataset))
     score = 100 / (1 + log_loss(y, dfp.values, eps=1E-15))
-    sprint(1, '[ {}\ttest\t{:.4f}\t{:.4f}\t{:.2f}%'.format(epoch, test_loss, score, accuracy))
+    sprint(1, '[ {} test\t{:.5f}\t{:.4f}\t{:.2f}%'.format(epoch, test_loss, score, accuracy))
     # sprint(2, '| {:.3f}\t{:.3f}%'.format())
     return test_loss
 
