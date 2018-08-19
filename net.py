@@ -7,14 +7,14 @@ import pickle as pkl
 import numpy as np
 import sys, os
 
-def main(args, l=5, masks=[], jdict = {}):
+def main(args, l=100, masks=[], jdict = {}):
     sprint(0, '[ args ]')
     for k in sorted(args.__dict__.keys()):
         sprint(2, "({}): {}".format(k, args.__dict__[k]))
     if len(masks) == 0 and not args.no_mask:
         fin = os.path.join(args.data, args.load)
         if not args.save and len(args.load) > 0 and os.path.exists(fin):
-            print(1, '[ loading %s' % fin)
+            sprint(1, ' [ loading %s' % fin)
             with open(fin, 'r') as f:
                 jdict = pkl.load(f)
         else:
@@ -36,7 +36,7 @@ def main(args, l=5, masks=[], jdict = {}):
             mn = min(map(len, jdict['masks'].values()))
             l = l if l < mn else mn
             masks = np.array([jdict['masks'][c][:l] for c in jdict['keys']])
-            print(masks.shape)
+            # print(masks.shape)
         else:
             masks = [fmask(jdict['masks'][c]) for c in jdict['keys']]
     sys.stdout.write('[ model ')

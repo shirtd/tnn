@@ -38,7 +38,6 @@ class TestTensor(object):#transforms.ToTensor):
             return sample
         x = sample.view(28, 28)
         X = torch.stack([m * x for m in self.masks], 0)
-        # print(X.shape)
         # X = X.view(10, -1, 28, 28)
         # print(X.shape)
         # y = torch.from_numpy(np.array(labels, dtype=np.int64))
@@ -76,8 +75,11 @@ class TestNet(nn.Module):
     def forward(self, x):
         ''' convolution '''
         # in -> conv1
+        print(x.shape)
         x = self.conv1(x)
+        print(x.shape)
         x = F.max_pool3d(x, 2)
+        print(x.shape)
         x = F.relu(x)
         # conv1 -> conv2
         x = self.conv2(x)
