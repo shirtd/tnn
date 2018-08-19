@@ -28,7 +28,7 @@ def main(args, masks=[], jdict = {}):
                 if not os.path.exists(args.data):
                     sprint(2, '! creating directory %s' % args.data)
                     os.mkdir(args.data)
-                fout = os.path.join(args.data, args.fout)
+                fout = os.path.join(args.data, args.fout + '%d.pkl' % args.k)
                 sprint(2, '| writing to %s' % fout)
                 with open(fout, 'w') as f:
                     pkl.dump(jdict, f)
