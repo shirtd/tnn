@@ -1,8 +1,8 @@
 # tnn
 
-    ![alt text](plot/dgm.png)
+![alt text](plot/dgm.png)
 
-    ![alt text](plot/masks.png)
+![alt text](plot/masks.png)
 
 ## TODO
 
