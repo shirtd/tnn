@@ -5,7 +5,7 @@ from src.cnet import cnet
 import numpy as np
 import sys, os
 
-def main(args, masks=[], jdict = {}, l=100, f=lambda x: x):
+def main(args, masks=[], jdict = {}, l=5, f=lambda x: x):
     sprint(0, '[ args ]')
     for k in sorted(args.__dict__.keys()):
         sprint(2, "({}): {}".format(k, args.__dict__[k]))
