@@ -1,6 +1,7 @@
 from args import DIMS, DIM, DIR
 from ripser import ripser
 from mnist import MNIST
+from multiprocessing import Pool
 from functools import partial
 from src.util import sprint
 #import persim, umap
@@ -22,13 +23,21 @@ def azip(r,d):
 def fmap(r, d):
     return sorted(map(fdict, azip(r, d)), key=lambda x: x['t'], reverse=True)
 
+def persist(data, X, c):
+    return ripser(data['X'][X[c]].T, do_cocycles=True)
+
 def get_masks(data, dims=DIMS):
     dims = range(dims+1)
     C = np.unique(data['y'])
     X = {c : np.where(data['y'] == c)[0] for c in C}
     sprint(2, '| computing persistence diagrams')
     warnings.filterwarnings("ignore")
-    R = {c : ripser(data['X'][X[c]].T, do_cocycles=True) for c in C}
+    f = partial(persist, data, X)
+    pool = Pool()
+    R = dict(zip(C, pool.map(f, C)))
+    pool.join()
+    pool.close()
+    # R = {c : ripser(data['X'][X[c]].T, do_cocycles=True) for c in C}
     sprint(2, '| retrieving cocycles')
     B = {d : {c : R[c]['dgms'][d] for c in C} for d in dims}
     D = {d : {c : fmap(R[c], d) for c in C} for d in dims}
