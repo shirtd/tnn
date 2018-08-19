@@ -62,7 +62,7 @@ class TestNet(nn.Module):
         self.s1, self.s2 = 1, 1
         self.p1 = self.k1 / 2
         self.p2 = self.k2 / 2
-        self.r1, self.r2 = 2, 2
+        self.r1, self.r2 = 4, 2
 
         # # connected
         # self.n3 = self.k * self.n0 * 320
@@ -70,9 +70,9 @@ class TestNet(nn.Module):
         # self.n5 = self.k * self.n0 * 10 * 3
 
         # connected
-        self.n3 = self.n0 * 320 * 16 * 4
-        self.n4 = self.n0 * 50 * 8 * 4
-        self.n5 = self.n0 * 10 * 4 * 4
+        self.n3 = self.n0 * 320 * 16
+        self.n4 = self.n0 * 50 * 8
+        self.n5 = self.n0 * 10 * 4
 
         ''' layers '''
         # convolution
