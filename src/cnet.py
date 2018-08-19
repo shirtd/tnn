@@ -207,7 +207,8 @@ def cnet(args, masks):
     print(str(model)[:-2])
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', verbose=True, cooldown=10)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer,
+                    'min', verbose=True, cooldown=5, patience=5)
 
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
