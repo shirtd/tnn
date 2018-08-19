@@ -96,7 +96,7 @@ class TestNet(nn.Module):
         x = F.max_pool3d(x, self.r1)
         print(x.shape)
         x = F.relu(x)
-        print
+        print()
 
         # conv1 -> conv2
         x = self.conv2(x)
@@ -105,7 +105,7 @@ class TestNet(nn.Module):
         x = F.max_pool3d(x, self.r2)
         print(x.shape)
         x = F.relu(x)
-        print
+        print()
 
 
         ''' connected '''
