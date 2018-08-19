@@ -58,9 +58,9 @@ class TestNet(nn.Module):
         # convolution
         self.n1 = self.n0 * 10
         self.n2 = self.n0 * 20
-        self.k1, self.k2 = (4, 4, 2), (4, 4, 2)
+        self.k1, self.k2 = 4, 4
         self.s1, self.s2 = 2, 2
-        self.p1 = ()
+        self.p1 = self.k1 / 2
         self.p2 = self.k2 / 2
         self.r1, self.r2 = 2, 2
 
