@@ -10,7 +10,7 @@ from torchvision import datasets, transforms
 from torchvision.datasets import MNIST
 
 def pad(k):
-    return int(np.ceil(float(k) / 2))
+    return int(np.floor(float(k) / 2))
 
 class MaskTensor(object):#transforms.ToTensor):
     def __init__(self, masks):
