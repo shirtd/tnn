@@ -12,6 +12,9 @@ def pmap(fun, x, *args):
         y = pool.map(f, x)
     except KeyboardInterrupt as e:
         print(e)
+        pool.close()
+        pool.join()
+        sys.exit()
     pool.close()
     pool.join()
     return y

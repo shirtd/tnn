@@ -3,7 +3,10 @@ import argparse
 K = -1
 DIMS = 1
 DIM = DIMS
+PLOT = 'plot'
+DATA = 'data'
 DIR = 'mnist'
+FOUT = DIR + '.pkl'
 
 parser = argparse.ArgumentParser(description='mnist persistence.')
 parser.add_argument('--dir', default=DIR, help='source data directory. default: %s' % DIR)
@@ -22,7 +25,10 @@ parser.add_argument('--test', action='store_true', default=False, help='test 3d 
 parser.add_argument('-v','--verbose', action='store_true', default=False, help='verbose train')
 parser.add_argument('--plot', default='dgm', help='persistence representation. default: diagram')
 parser.add_argument('--save', action='store_true', help='save plots')
-parser.add_argument('--pdir', default='plot', help='plot directory')
+parser.add_argument('--pdir', default=PLOT, help='plot directory')
+parser.add_argument('--data', default=DATA, help='data directory')
+parser.add_argument('--load', default=FOUT, help='file to load. default: %s' % FOUT)
+parser.add_argument('--fout', default=FOUT, help='file to save. default: %s' % FOUT)
 # parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
 # parser.add_argument('-t', '--transpose', action='store_false', help='sample space persistence (no transpose)')
 # parser.add_argument('-','--dims', type=int, nargs='+', default=[0,1], help='')

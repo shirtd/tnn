@@ -3,25 +3,40 @@ from src.args import parser
 from src.util import sprint
 from src.cnet import cnet
 from src.tda import *
+import pickle as pkl
 import numpy as np
 import sys, os
 
-def main(args, masks=[], jdict = {}, l=5, f=lambda x: x):
+def main(args, l=5, masks=[], jdict = {}):
     sprint(0, '[ args ]')
     for k in sorted(args.__dict__.keys()):
         sprint(2, "({}): {}".format(k, args.__dict__[k]))
     if len(masks) == 0 and not args.no_mask:
-        train = get_data('train', args.dir)
-        test = get_data('test', args.dir)
-        sprint(1, '[ getting masks in dimension 0-%d' % args.dims)
-        jdict = get_persist(train, args.dims)
-        sprint(1, '[ building masks in dimension %d' % args.dim)
-        jdict['masks'] = get_masks(jdict, args.dim, args.k)
+        fin = os.path.join(args.data, args.load)
+        if not args.save and len(args.load) > 0 and os.path.exists(fin):
+            print(1, '[ loading %s' % fin)
+            with open(fin, 'r') as f:
+                jdict = pkl.load(f)
+        else:
+            train = get_data('train', args.dir)
+            test = get_data('test', args.dir)
+            sprint(1, '[ getting masks in dimension 0-%d' % args.dims)
+            jdict = get_persist(train, args.dims)
+            sprint(1, '[ building masks in dimension %d' % args.dim)
+            jdict['masks'] = get_masks(jdict, args.dim, args.k)
+            if args.save:
+                if not os.path.exists(args.data):
+                    sprint(2, '! creating directory %s' % args.data)
+                    os.mkdir(args.data)
+                fout = os.path.join(args.data, args.fout)
+                sprint(2, '| writing to %s' % fout)
+                with open(fout, 'w') as f:
+                    pkl.dump(jdict, f)
         if args.test:
             mn = min(map(len, jdict['masks'].values()))
             l = l if l < mn else mn
             masks = np.array([jdict['masks'][c][:l] for c in jdict['keys']])
-            sprint(2, masks.shape)
+            print(masks.shape)
         else:
             masks = [fmask(jdict['masks'][c]) for c in jdict['keys']]
     sys.stdout.write('[ model ')
