@@ -7,7 +7,7 @@ import pickle as pkl
 import numpy as np
 import sys, os
 
-def main(args, l=100, masks=[], jdict = {}):
+def main(args, masks=[], jdict = {}):
     sprint(0, '[ args ]')
     for k in sorted(args.__dict__.keys()):
         sprint(2, "({}): {}".format(k, args.__dict__[k]))
@@ -34,7 +34,7 @@ def main(args, l=100, masks=[], jdict = {}):
                     pkl.dump(jdict, f)
         if args.test:
             mn = min(map(len, jdict['masks'].values()))
-            l = l if l < mn else mn
+            l = args.k if args.k < mn else mn
             masks = np.array([jdict['masks'][c][:l] for c in jdict['keys']])
             # print(masks.shape)
         else:
