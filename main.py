@@ -1,21 +1,28 @@
+from functools import partial
+from src.util import sprint
 from src.args import parser
 from src.plot import *
 import src.tda as tda
 import sys, os
 
-def main(args, data='train'):
-    sys.stdout.write('[ args ] ')
-    print(args.__dict__)
+def main(args, data='train', dir='plot'):
+    sprint(0, '[ args ]')
+    for k in sorted(args.__dict__.keys()):
+        sprint(2, "({}): {}".format(k, args.__dict__[k]))
     train = tda.get_data('train', args.dir)
-    print('[ getting masks in dimension 0-%d' % args.dims)
-    jdict = tda.get_masks(train, args.dims)
-    print('[ building masks in dimension %d' % args.dim)
-    jdict['masks'] = tda.build_masks(jdict, args.dim, args.k) #, f=lambda x: x)
+    sprint(1, '[ getting masks in dimension 0-%d' % args.dims)
+    jdict = tda.get_persist(train, args.dims)
+    sprint(1, '[ building masks in dimension %d' % args.dim)
+    jdict['masks'] = tda.get_masks(jdict, args.dim, args.k)
 
     plot_dgms(ax[0], jdict['barcodes'])
     plot_masks(ax[1], jdict['masks'])
-    fig[0].savefig(os.path.join('plot','dgm.png'))
-    fig[1].savefig(os.path.join('plot','masks.png'))
+    f = partial(os.path.join, dir)
+    fdgm,fmask = map(f, ('dgm.png','masks.png'))
+    sprint(2, '| saving %s' % fdgm)
+    fig[0].savefig(fdgm)
+    sprint(2, '| saving %s' % fmask)
+    fig[1].savefig(fmask)
     return jdict
 
 if __name__ == '__main__':

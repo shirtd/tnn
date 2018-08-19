@@ -38,9 +38,9 @@ class TestTensor(object):#transforms.ToTensor):
             return sample
         x = sample.view(28, 28)
         X = torch.stack([m * x for m in self.masks], 0)
-        print(X.shape)
-        X = X.view(10, -1, 28, 28)
-        print(X.shape)
+        # print(X.shape)
+        # X = X.view(10, -1, 28, 28)
+        # print(X.shape)
         # y = torch.from_numpy(np.array(labels, dtype=np.int64))
         return X#, y
 

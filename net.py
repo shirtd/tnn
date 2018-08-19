@@ -13,9 +13,9 @@ def main(args, masks=[], jdict = {}, l=5, f=lambda x: x):
         train = tda.get_data('train', args.dir)
         test = tda.get_data('test', args.dir)
         sprint(1, '[ getting masks in dimension 0-%d' % args.dims)
-        jdict = tda.get_masks(train, args.dims)
+        jdict = tda.get_persist(train, args.dims)
         sprint(1, '[ building masks in dimension %d' % args.dim)
-        jdict['masks'] = tda.build_masks(jdict, args.dim, args.k, f=f)
+        jdict['masks'] = tda.get_masks(jdict, args.dim, args.k)
         if args.test:
             mn = min(map(len, jdict['masks'].values()))
             l = l if l < mn else mn
