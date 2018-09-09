@@ -1,0 +1,22 @@
+#!/bin/bash
+TAR="cifar-10-python.tar.gz"
+DOMAIN="https://www.cs.toronto.edu/~kriz"
+URL="$DOMAIN/$TAR"
+FILE="cifar-10-batches-py"
+DIR="datasets"
+NAME="cifar-10"
+DEST="$DIR/$NAME"
+
+# echo "$ getting $URL"
+# wget --no-check-certificate $URL
+# echo "$ creating directory $DIR"
+# mkdir $DIR
+# echo "$ extracting $TAR"
+# tar -zxf $TAR
+# echo "$ moving $FILE to $DEST"
+# mv $FILE $DEST
+# echo "$ removing $TAR"
+# rm $TAR
+
+echo "$ building train/test"
+python datasets/build_cifar.py

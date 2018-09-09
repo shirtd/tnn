@@ -5,11 +5,15 @@ DIMS = 1
 DIM = DIMS
 PLOT = 'plot'
 DATA = 'data'
+SRC = 'datasets'
 DIR = 'mnist'
 FOUT = DIR
 
-parser = argparse.ArgumentParser(description='mnist persistence.')
+parser = argparse.ArgumentParser(description='feature space persistence.')
+# parser.add_argument('data', default=DIR, nargs='?', help='dataset. default: %s' % DIR)
+parser.add_argument('data', default='cifar', nargs='?', help='dataset. default: cifar') # %s' % DIR)
 parser.add_argument('--dir', default=DIR, help='source data directory. default: %s' % DIR)
+parser.add_argument('-n', '--n', type=int, default=10, help='size of each group (dimension)')
 parser.add_argument('-D', '--dims', type=int, default=DIMS, help='max dimension. default: %d' % DIMS)
 parser.add_argument('-d', '--dim', type=int, default=DIM, help='analysis dimension. default: %d' % DIM)
 parser.add_argument('-k', '--k', type=int, default=K, help='number of features to use. default: %s' % K)
@@ -28,4 +32,8 @@ parser.add_argument('--load', default=FOUT, help='file to load. default: %s' % F
 parser.add_argument('--fout', default=FOUT, help='file to save. default: %s' % FOUT)
 parser.add_argument('--save', action='store_true', help='save plots')
 parser.add_argument('--pdir', default=PLOT, help='plot directory')
-parser.add_argument('--data', default=DATA, help='data directory')
+# parser.add_argument('--data', default=DATA, help='data directory')
+parser.add_argument('--sdir', default=DATA, help='data directory')
+parser.add_argument('--fun', default='id', help='weight function')
+
+parser.add_argument('--test-class', nargs='?', default=[], const=[], help='test classes for graph.py')

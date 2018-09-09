@@ -6,7 +6,9 @@ import os
 
 def plot_mask(axis, x, f=fmask):
     s = f(x)
-    axis.imshow(s, interpolation="bilinear")
+    if s.shape[2] != 3:
+        s = s[:, :, 0]
+    axis.imshow(s)
     return s
 
 def plot_masks(axis, masks):
@@ -48,15 +50,16 @@ def axinit(i, r=2, c=5, sharex=True, sharey=True, figsize=(12,5)):
 
 fig, ax = zip(*map(axinit,range(2)))
 
-def plot(args, jdict):
-    plot_persist[args.plot](ax[0], jdict['barcodes'])
-    plot_masks(ax[1], jdict['masks'])
+def plot(args, jdicts, masks):
+    for jdict in jdicts:
+        plot_persist[args.plot](ax[0], jdict['barcodes'])
+    plot_masks(ax[1], masks)
     if args.save:
         if not os.path.exists(args.pdir):
             sprint(2, '! creating directory %s' % args.pdir)
             os.mkdir(args.pdir)
-        fdgm = os.path.join(args.pdir, '%s.png' % args.plot)
-        fmask = os.path.join(args.pdir, 'masks.png')
+        fdgm = os.path.join(args.pdir, '_'.join([args.data,'%s.png' % args.plot]))
+        fmask = os.path.join(args.pdir, '_'.join([args.data,'masks.png']))
         sprint(2, '| saving %s' % fdgm)
         fig[0].savefig(fdgm)
         sprint(2, '| saving %s' % fmask)

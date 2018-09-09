@@ -1,8 +1,16 @@
 # tnn
 
-![alt text](plot/dgm.png)
+## MNIST
 
-![alt text](plot/masks.png)
+![alt text](plot/mnist_dgm.png)
+
+![alt text](plot/mnist_masks.png)
+
+## CIFAR-10
+
+![alt text](plot/cifar_dgm.png)
+
+![alt text](plot/cifar_masks.png)
 
 ## TODO
 

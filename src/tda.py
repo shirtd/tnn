@@ -16,23 +16,23 @@ def azip(r,d):
 def fmap(r, d):
     return sorted(map(fdict, azip(r, d)), key=lambda x: x['t'], reverse=True)
 
-def persist(data, X, c):
-    return ripser(data['X'][X[c]].T, do_cocycles=True)
+def persist(data, X, dim, c):
+    return ripser(data['X'][X[c]].T, do_cocycles=True, maxdim=dim)
 
-def get_persist(data, dims=DIMS):
+def get_persist(data, dims=DIMS, n=10):
     dims = range(dims+1)
     C = np.unique(data['y'])
     X = {c : np.where(data['y'] == c)[0] for c in C}
     sprint(2, '| computing persistence diagrams')
     warnings.filterwarnings("ignore")
-    R = dmap(persist, C, data, X)
+    R = dmap(persist, C, data, X, max(dims))
     # R = {c : ripser(data['X'][X[c]].T, do_cocycles=True) for c in C}
     sprint(2, '| retrieving cocycles')
     B = {d : {c : R[c]['dgms'][d] for c in C} for d in dims}
     D = {d : {c : fmap(R[c], d) for c in C} for d in dims}
     return {'keys' : C, 'data' : data, 'diagrams' : D, 'barcodes' : B} #, 'cocycles' : G}
 
-def to_mask(dgm, k=100, l=0.0, n=28*28):
+def to_mask(dgm, k, l, n):
     c = dgm['cycles'] if len(dgm['cycles']) < k else dgm['cycles'][:k]
     return [dgm['t'] if i in dgm['cycles'][:k] else l for i in range(n)]
 
@@ -42,17 +42,33 @@ def to_mask(dgm, k=100, l=0.0, n=28*28):
 # def masks_fun(dgms, k, l, c):
 #     return make_masks(dgms[c], k ,l)
 
-def masks_fun(dgms, k, l, c):
-    return np.vstack(map(lambda x: to_mask(x, k, l), dgms[c])).reshape(-1, 28, 28)
+def masks_fun(dgms, k, l, s, c):
+    return np.vstack(map(lambda x: to_mask(x, k, l, s[0]*s[1]), dgms[c])).reshape(-1, *s)
 
 def get_masks(jdict, dim=DIM, k=100, l=0.0):
-    return dmap(masks_fun, jdict['keys'], jdict['diagrams'][dim], k ,l)
+    return dmap(masks_fun, jdict['keys'], jdict['diagrams'][dim], k ,l, jdict['data']['shape'])
     # x, args = jdict['keys'], (jdict['diagrams'][dim], k ,l)
     # return dict(zip(jdict['keys'], pmap(masks_fun, x, *args)))
     # return dict(zip(jdict['keys'], pmap(f, jdict['keys'])))
     # return {c : make_masks(jdict['diagrams'][dim][c], k ,l, f) for c in jdict['keys']}
 
 def fmask(X):
-    x = np.array(np.sum(X, axis=0), dtype=float)
-    num, den = x - x.min(), x.max() - x.min()
-    return x if x.max() == 0 else x / x.max() if den == 0 else num / den
+    y = np.array(np.sum(X, axis=0), dtype=float)
+    for i in range(y.shape[2]):
+        x = y[:,:,i]
+        num, den = x - x.min(), x.max() - x.min()
+        y[:,:,i] = x if x.max() == 0 else x / x.max() if den == 0 else num / den
+    return y
+
+def build(args, dat, i):
+    sprint(0, '[ constructing masks for channel %d' % i)
+    sprint(1, '[ getting masks in dimension 0-%d' % args.dims)
+    jdict = get_persist(dat, args.dims)
+    sprint(1, '[ building masks in dimension %d' % args.dim)
+    jdict['masks'] = get_masks(jdict, args.dim, args.k)
+    return jdict
+
+def build_mask(jdicts, c):
+    masks = [jdict['masks'][c] for jdict in jdicts]
+    n = min(m.shape[0] for m in masks)
+    return np.stack([m[:n] for m in masks], 3)

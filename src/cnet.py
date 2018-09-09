@@ -7,9 +7,13 @@ import torch.optim as optim
 from src.util import sprint
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
-from torchvision.datasets import MNIST
+from torchvision.datasets import MNIST, CIFAR10
 from sklearn.metrics import *
 import pandas as pd
+
+DATASETS = {'mnist' : MNIST, 'cifar' : CIFAR10}
+SHAPE = {'mnist' : (1, 28, 28, 1), 'cifar' : (3, 32, 32)}
+CLASS = {'mnist' : 10, 'cifar' : 10}
 
 ''' UTIL '''
 def pad(k):
@@ -17,142 +21,73 @@ def pad(k):
 
 ''' DEFAULT '''
 class MaskTensor(object):
-    def __init__(self, masks):
+    def __init__(self, masks, shape):
         super(MaskTensor, self).__init__()
         if len(masks) > 0:
             self.masks = [torch.from_numpy(m).float() for m in masks]
         else:
             self.masks = None
+        self.shape = shape
     def __call__(self, sample):
         if self.masks == None:
             return sample
-        x = sample.view(28, 28)
-        X = torch.stack([m * x for m in self.masks], 0).view(len(self.masks), 28, 28)
-        return X
+        # x = sample.view(*self.shape)
+        x = torch.Tensor(sample)
+        # print(x.shape)
+        # print(self.masks[0].shape)
+        X = torch.stack([m * x for m in self.masks], 0)
+        return X.view(self.shape[0] * len(self.masks), self.shape[1], self.shape[2])
 
 class Net(nn.Module):
-    def __init__(self, masks, n=10):
+    def __init__(self, masks, c):
         super(Net, self).__init__()
         ''' in/out '''
-        self.n0 = len(masks) if len(masks) > 0 else 1
+        self.masks = masks
+        self.n0 = c * (len(self.masks) if len(self.masks) > 0 else 1)
+        self.n = len(masks)
         # self.n0 = 1 if masks == None else len(masks)
-        self.n = n
         ''' neurons '''
         # convolution
-        self.n1 = self.n0 * 10
-        self.n2 = self.n0 * 20
+        self.n1 = self.n0 * 2
+        self.n2 = self.n0 * 4
         self.k1, self.k2 = 5, 5
+        # self.s1, self.s2 = 2, 2
         # connected
-        self.n3 = self.n0 * 320
-        self.n4 = self.n0 * 50
-        self.n5 = self.n0 * 10
+        self.n3 = self.n0 * 100 #/ (self.s1 * self.s2)
+        self.n4 = self.n0 * 50 #/ (self.s1 * self.s2)
+        self.n5 = self.n0 * 20 #/ (self.s1 * self.s2)
+        self.n6 = self.n0 * 10
+        self.n7 = self.n0 * 2
 
         ''' layers '''
         # convolution
-        self.conv1 = nn.Conv2d(self.n0, self.n1, self.k1)
-        self.conv2 = nn.Conv2d(self.n1, self.n2, self.k2)
+        self.conv1 = nn.Conv2d(self.n0, self.n1, self.k1) #, stride=self.s1)
+        self.conv2 = nn.Conv2d(self.n1, self.n2, self.k2) #, stride=self.s2)
         self.conv2_drop = nn.Dropout2d()
         # connected
         self.fc1 = nn.Linear(self.n3, self.n4)
         self.fc2 = nn.Linear(self.n4, self.n5)
-        self.fc3 = nn.Linear(self.n5, self.n)
+        self.fc3 = nn.Linear(self.n5, self.n6)
+        self.fc4 = nn.Linear(self.n6, self.n7)
+        self.fc5 = nn.Linear(self.n7, self.n)
 
     def view(self, x):
         return x.view(-1, self.n3)
 
     def forward(self, x):
         ''' convolution '''
+        # print(x.shape)
         # in -> conv1
         x = self.conv1(x)
         x = F.max_pool2d(x, 2)
         x = F.relu(x)
+        # print(x.shape)
         # conv1 -> conv2
         x = self.conv2(x)
         x = self.conv2_drop(x)
         x = F.max_pool2d(x, 2)
         x = F.relu(x)
-
-        ''' connected '''
-        x = self.view(x)
-        # conv2 -> linear1
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = F.dropout(x, training=self.training)
-        # linear1 -> linear2
-        x = self.fc2(x)
-        x = F.relu(x)
-        # linear2 -> linear3 (out)
-        x = self.fc3(x)
-        return F.log_softmax(x, dim=1)
-
-''' TEST '''
-class TestTensor(object):
-    def __init__(self, masks):
-        super(TestTensor, self).__init__()
-        self.masks = torch.from_numpy(masks).float()
-    def __call__(self, sample):
-        if len(self.masks) == 0:
-            return sample
-        x = sample.view(28, 28)
-        X = torch.stack([m * x for m in self.masks], 0)
-        return X
-
-class TestNet(nn.Module):
-    def __init__(self, masks, k,  n=10, dim=28):
-        super(TestNet, self).__init__()
-        ''' in/out '''
-        self.k = k
-        self.dim = dim
-        self.n0 = 1 if len(masks) == 0 else len(masks)
-        self.n = n
-        ''' neurons '''
-        # convolution
-        self.n1 = self.n0 * 10
-        self.n2 = self.n0 * 20
-        self.k1, self.k2 = 4, 4
-        self.s1, self.s2 = 2, 2
-        self.p1 = self.k1 / 2
-        self.p2 = self.k2 / 2
-        self.r1, self.r2 = 2, 2
-
-        # connected
-        self.n3 = self.n0 * 160 * dim / k
-        self.n4 = self.n0 * 110 * dim / k
-        self.n5 = self.n0 * 50 * dim / k
-
-        ''' layers '''
-        # convolution
-        self.conv1 = nn.Conv3d(self.n0, self.n1, self.k1, self.s1, self.p1, groups=self.n0)
-        self.conv2 = nn.Conv3d(self.n1, self.n2, self.k2, self.s2, self.p2)#, groups=self.n0)
-        self.conv2_drop = nn.Dropout3d()
-        # connected
-        self.fc1 = nn.Linear(self.n3, self.n4)
-        self.fc2 = nn.Linear(self.n4, self.n5)
-        self.fc3 = nn.Linear(self.n5, self.n)
-
-    def view(self, x):
-        return x.view(-1, self.n3)
-
-    def forward(self, x):
-        ''' convolution '''
-        # in -> conv1
         # print(x.shape)
-        x = self.conv1(x)
-        # print(x.shape)
-        x = F.max_pool3d(x, self.r1)
-        # print(x.shape)
-        x = F.relu(x)
-        # print()
-
-        # conv1 -> conv2
-        x = self.conv2(x)
-        # print(x.shape)
-        x = self.conv2_drop(x)
-        x = F.max_pool3d(x, self.r2)
-        # print(x.shape)
-        x = F.relu(x)
-        # print()
-
 
         ''' connected '''
         x = self.view(x)
@@ -161,13 +96,21 @@ class TestNet(nn.Module):
         x = self.fc1(x)
         x = F.relu(x)
         x = F.dropout(x, training=self.training)
+        # print(x.shape)
         # linear1 -> linear2
         x = self.fc2(x)
         x = F.relu(x)
-        # linear2 -> linear3 (out)
+        # print(x.shape)
+        # linear2 -> linear3
         x = self.fc3(x)
+        x = F.relu(x)
+        # print(x.shape)
+        # linear3 -> linear4
+        x = self.fc4(x)
+        x = F.relu(x)
+        # linear4 -> linear5 (out)
+        x = self.fc5(x)
         return F.log_softmax(x, dim=1)
-
 
 ''' RUN TRAIN '''
 def train(args, model, device, train_loader, optimizer, epoch):
@@ -217,20 +160,27 @@ def cnet(args, masks):
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
-    train_loader = DataLoader(MNIST('../data', train=True, download=True,
+    DATA = DATASETS[args.data]
+    shape = SHAPE[args.data]
+
+    train_loader = DataLoader(DATA('../data', train=True, download=True,
                         transform = transforms.Compose([
                             transforms.ToTensor(),
-                            transforms.Normalize((0.1307,), (0.3081,)),
-                            TestTensor(masks) if args.test else MaskTensor(masks)])),
+                            # transforms.Normalize((0.1307,), (0.3081,)),
+                            # TestTensor(masks,shape) if args.test else MaskTensor(masks,shape)])),
+                            MaskTensor(masks, shape)])),
                     batch_size=args.batch, shuffle=True, **kwargs)
-    test_loader = DataLoader(MNIST('../data', train=False,
+    test_loader = DataLoader(DATA('../data', train=False,
                         transform = transforms.Compose([
                             transforms.ToTensor(),
-                            transforms.Normalize((0.1307,), (0.3081,)),
-                            TestTensor(masks) if args.test else MaskTensor(masks)])),
+                            # transforms.Normalize((0.1307,), (0.3081,)),
+                            # TestTensor(masks,shape) if args.test else MaskTensor(masks,shape)])),
+                            MaskTensor(masks, shape)])),
                     batch_size=args.test_batch, shuffle=True, **kwargs)
 
-    model = TestNet(masks, args.k).to(device) if args.test else Net(masks).to(device)
+    # model = TestNet(masks, args.k, shape[0]*10, shape[1]).to(device) if args.test else Net(masks, shape[0]*10, shape[1]).to(device)
+    model = Net(masks, shape[0]).to(device)
+
     print(str(model)[:-2])
 
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
@@ -244,15 +194,99 @@ def cnet(args, masks):
 
     return model
 
-def get_load():
-    return DataLoader(MNIST('../data', train=True, download=True,
-                transform = transforms.Compose([transforms.ToTensor()])),
-            batch_size=1000, shuffle=False)
-
-def aload(load=get_load()):
-    p, l = [], []
-    for data, target in load:
-        p.append(data)
-        l.append(target)
-    p = torch.cat(p, 0).view(-1,28,28)
-    return p, torch.cat(l)
+# ''' TEST '''
+# class TestTensor(object):
+#     def __init__(self, masks, shape):
+#         super(TestTensor, self).__init__()
+#         self.shape = shape
+#         self.masks = torch.from_numpy(masks).float()
+#     def __call__(self, sample):
+#         if len(self.masks) == 0:
+#             return sample
+#         x = sample.view(*shape)
+#         X = torch.stack([m * x for m in self.masks], 0)
+#         return X
+#
+# class TestNet(nn.Module):
+#     def __init__(self, masks, k,  n, dim):
+#         super(TestNet, self).__init__()
+#         ''' in/out '''
+#         self.k = k
+#         self.dim = dim
+#         self.n0 = 1 if len(masks) == 0 else len(masks)
+#         self.n = n
+#         ''' neurons '''
+#         # convolution
+#         self.n1 = self.n0 * 10
+#         self.n2 = self.n0 * 20
+#         self.k1, self.k2 = 4, 4
+#         self.s1, self.s2 = 2, 2
+#         self.p1 = self.k1 / 2
+#         self.p2 = self.k2 / 2
+#         self.r1, self.r2 = 2, 2
+#
+#         # connected
+#         self.n3 = self.n0 * 160 * dim / k
+#         self.n4 = self.n0 * 110 * dim / k
+#         self.n5 = self.n0 * 50 * dim / k
+#
+#         ''' layers '''
+#         # convolution
+#         self.conv1 = nn.Conv3d(self.n0, self.n1, self.k1, self.s1, self.p1, groups=self.n0)
+#         self.conv2 = nn.Conv3d(self.n1, self.n2, self.k2, self.s2, self.p2)#, groups=self.n0)
+#         self.conv2_drop = nn.Dropout3d()
+#         # connected
+#         self.fc1 = nn.Linear(self.n3, self.n4)
+#         self.fc2 = nn.Linear(self.n4, self.n5)
+#         self.fc3 = nn.Linear(self.n5, self.n)
+#
+#     def view(self, x):
+#         return x.view(-1, self.n3)
+#
+#     def forward(self, x):
+#         ''' convolution '''
+#         # in -> conv1
+#         # print(x.shape)
+#         x = self.conv1(x)
+#         # print(x.shape)
+#         x = F.max_pool3d(x, self.r1)
+#         # print(x.shape)
+#         x = F.relu(x)
+#         # print()
+#
+#         # conv1 -> conv2
+#         x = self.conv2(x)
+#         # print(x.shape)
+#         x = self.conv2_drop(x)
+#         x = F.max_pool3d(x, self.r2)
+#         # print(x.shape)
+#         x = F.relu(x)
+#         # print()
+#
+#
+#         ''' connected '''
+#         x = self.view(x)
+#         # print(x.shape)
+#         # conv2 -> linear1
+#         x = self.fc1(x)
+#         x = F.relu(x)
+#         x = F.dropout(x, training=self.training)
+#         # linear1 -> linear2
+#         x = self.fc2(x)
+#         x = F.relu(x)
+#         # linear2 -> linear3 (out)
+#         x = self.fc3(x)
+#         return F.log_softmax(x, dim=1)
+#
+# # def get_load():
+# #     return DataLoader(MNIST('../data', train=True, download=True,
+# #                 transform = transforms.Compose([transforms.ToTensor()])),
+# #             batch_size=1000, shuffle=False)
+# #
+# # def aload(load=get_load()):
+# #     p, l = [], []
+# #     for data, target in load:
+# #         p.append(data)
+# #         l.append(target)
+# #     p = torch.cat(p, 0).view(-1,28,28)
+# #     return p, torch.cat(l)
