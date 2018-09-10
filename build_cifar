@@ -7,16 +7,16 @@ DIR="datasets"
 NAME="cifar-10"
 DEST="$DIR/$NAME"
 
-# echo "$ getting $URL"
-# wget --no-check-certificate $URL
-# echo "$ creating directory $DIR"
-# mkdir $DIR
-# echo "$ extracting $TAR"
-# tar -zxf $TAR
-# echo "$ moving $FILE to $DEST"
-# mv $FILE $DEST
-# echo "$ removing $TAR"
-# rm $TAR
+echo "$ getting $URL"
+wget --no-check-certificate $URL
+echo "$ creating directory $DIR"
+mkdir $DIR
+echo "$ extracting $TAR"
+tar -zxf $TAR
+echo "$ moving $FILE to $DEST"
+mv $FILE $DEST
+echo "$ removing $TAR"
+rm $TAR
 
 echo "$ building train/test"
 python datasets/build_cifar.py
