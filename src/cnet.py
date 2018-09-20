@@ -154,7 +154,7 @@ def test(args, model, device, test_loader, epoch):
     return test_loss
 
 ''' RUN '''
-def cnet(args, masks):
+def cnet(args, masks, stats):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
 
@@ -168,14 +168,16 @@ def cnet(args, masks):
                             transforms.ToTensor(),
                             # transforms.Normalize((0.1307,), (0.3081,)),
                             # TestTensor(masks,shape) if args.test else MaskTensor(masks,shape)])),
-                            MaskTensor(masks, shape)])),
+                            MaskTensor(masks, shape),
+                            transforms.Normalize(*stats)])),
                     batch_size=args.batch, shuffle=True, **kwargs)
     test_loader = DataLoader(DATA('../data', train=False,
                         transform = transforms.Compose([
                             transforms.ToTensor(),
                             # transforms.Normalize((0.1307,), (0.3081,)),
                             # TestTensor(masks,shape) if args.test else MaskTensor(masks,shape)])),
-                            MaskTensor(masks, shape)])),
+                            MaskTensor(masks, shape),
+                            transforms.Normalize(*stats)])),
                     batch_size=args.test_batch, shuffle=True, **kwargs)
 
     # model = TestNet(masks, args.k, shape[0]*10, shape[1]).to(device) if args.test else Net(masks, shape[0]*10, shape[1]).to(device)

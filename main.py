@@ -16,12 +16,19 @@ def main(args, data='train', dir='plot'):
     jdicts = [build(args, t, i) for i,t in enumerate(train)]
     masks = {c : build_mask(jdicts, c) for c in C}
     plot(args, jdicts, masks)
-    return jdicts, masks
+    return jdicts, masks, train
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    jdicts, masks = main(args)
+    jdicts, masks, train = main(args)
     # jdicts = main(args)
+
+# Y = [standardize(MX[i], s) for i,s in enumerate(S)]
+
+
+
+# MX = [[m[i] * X[i] for i in range(3)] for m in M]
+# M = np.array([m.reshape(3, 1024) for m in _masks]
 
 # sprint(1, '[ getting masks in dimension 0-%d' % args.dims)
 # # print(train['shape'])

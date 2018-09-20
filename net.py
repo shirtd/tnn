@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from src.data import get_data
 from src.args import parser
-from src.util import sprint
+from src.util import sprint, all_stats
 from src.cnet import cnet
 from src.tda import *
 import pickle as pkl
@@ -23,6 +23,7 @@ def main(args):#, masks=[], jdict = {}):
         # jdicts = pdict['jdicts']
         # masks = pdict['masks']
         # # train, C = get_data(args.data, 'train', args.dir)
+        train, C = get_data(args.data, 'train', args.dir)
     else:
         train, C = get_data(args.data, 'train', args.dir)
         jdicts = [build(args, t, i) for i,t in enumerate(train)]
@@ -44,13 +45,15 @@ def main(args):#, masks=[], jdict = {}):
     # sys.stdout.write('[ model ')
     # net = cnet(args, masks)
     # return jdicts, masks, net
-    return masks
+
+    stats = zip(*all_stats(train, masks).reshape(-1, 2))
+    return masks, stats
 
 if __name__ == '__main__':
     args = parser.parse_args()
     # jdicts, masks, net = main(args)
-    masks = main(args)
-    net = cnet(args, masks)
+    masks, stats = main(args)
+    net = cnet(args, masks, stats)
 
 # X = torch.stack([m * x for m in masks], 0).view(len(masks), *shape)
 
