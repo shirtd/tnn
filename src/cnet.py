@@ -12,7 +12,7 @@ from sklearn.metrics import *
 import pandas as pd
 
 DATASETS = {'mnist' : MNIST, 'cifar' : CIFAR10}
-SHAPE = {'mnist' : (1, 28, 28, 1), 'cifar' : (3, 32, 32)}
+SHAPE = {'mnist' : (1, 28, 28), 'cifar' : (3, 32, 32)}
 CLASS = {'mnist' : 10, 'cifar' : 10}
 
 ''' UTIL '''
@@ -28,15 +28,12 @@ class MaskTensor(object):
         else:
             self.masks = None
         self.shape = shape
-    def __call__(self, sample):
+    def __call__(self, x):
         if self.masks == None:
-            return sample
-        # x = sample.view(*self.shape)
-        x = torch.Tensor(sample)
-        # print(x.shape)
-        # print(self.masks[0].shape)
+            return x
         X = torch.stack([m * x for m in self.masks], 0)
-        return X.view(self.shape[0] * len(self.masks), self.shape[1], self.shape[2])
+        Y = X.view(self.shape[0] * len(self.masks), self.shape[1], self.shape[2])
+        return Y
 
 class Net(nn.Module):
     def __init__(self, masks, c):
@@ -45,7 +42,6 @@ class Net(nn.Module):
         self.masks = masks
         self.n0 = c * (len(self.masks) if len(self.masks) > 0 else 1)
         self.n = len(masks)
-        # self.n0 = 1 if masks == None else len(masks)
         ''' neurons '''
         # convolution
         self.n1 = self.n0 * 2
@@ -53,11 +49,12 @@ class Net(nn.Module):
         self.k1, self.k2 = 5, 5
         # self.s1, self.s2 = 2, 2
         # connected
-        self.n3 = self.n0 * 100 #/ (self.s1 * self.s2)
-        self.n4 = self.n0 * 50 #/ (self.s1 * self.s2)
-        self.n5 = self.n0 * 20 #/ (self.s1 * self.s2)
-        self.n6 = self.n0 * 10
-        self.n7 = self.n0 * 2
+        self.n3 = self.n0 * 128 #/ (self.s1 * self.s2)
+        self.n4 = self.n0 * 64 #/ (self.s1 * self.s2)
+        self.n5 = self.n0 * 32 #/ (self.s1 * self.s2)
+        self.n6 = self.n0 * 16
+        self.n7 = self.n0 * 8
+        self.n8 = self.n0 * 4
 
         ''' layers '''
         # convolution
@@ -69,47 +66,44 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(self.n4, self.n5)
         self.fc3 = nn.Linear(self.n5, self.n6)
         self.fc4 = nn.Linear(self.n6, self.n7)
-        self.fc5 = nn.Linear(self.n7, self.n)
+        self.fc5 = nn.Linear(self.n7, self.n8)
+        self.fc6 = nn.Linear(self.n8, self.n)
 
     def view(self, x):
         return x.view(-1, self.n3)
 
     def forward(self, x):
         ''' convolution '''
-        # print(x.shape)
         # in -> conv1
         x = self.conv1(x)
         x = F.max_pool2d(x, 2)
         x = F.relu(x)
-        # print(x.shape)
         # conv1 -> conv2
         x = self.conv2(x)
         x = self.conv2_drop(x)
         x = F.max_pool2d(x, 2)
         x = F.relu(x)
-        # print(x.shape)
 
         ''' connected '''
         x = self.view(x)
-        # print(x.shape)
         # conv2 -> linear1
         x = self.fc1(x)
         x = F.relu(x)
         x = F.dropout(x, training=self.training)
-        # print(x.shape)
         # linear1 -> linear2
         x = self.fc2(x)
         x = F.relu(x)
-        # print(x.shape)
         # linear2 -> linear3
         x = self.fc3(x)
         x = F.relu(x)
-        # print(x.shape)
         # linear3 -> linear4
         x = self.fc4(x)
         x = F.relu(x)
-        # linear4 -> linear5 (out)
+        # linear4 -> linear5
         x = self.fc5(x)
+        x = F.relu(x)
+        # linear5 -> linear6 (out)
+        x = self.fc6(x)
         return F.log_softmax(x, dim=1)
 
 ''' RUN TRAIN '''
@@ -166,21 +160,18 @@ def cnet(args, masks, stats):
     train_loader = DataLoader(DATA('../data', train=True, download=True,
                         transform = transforms.Compose([
                             transforms.ToTensor(),
-                            # transforms.Normalize((0.1307,), (0.3081,)),
-                            # TestTensor(masks,shape) if args.test else MaskTensor(masks,shape)])),
                             MaskTensor(masks, shape),
                             transforms.Normalize(*stats)])),
                     batch_size=args.batch, shuffle=True, **kwargs)
     test_loader = DataLoader(DATA('../data', train=False,
                         transform = transforms.Compose([
                             transforms.ToTensor(),
-                            # transforms.Normalize((0.1307,), (0.3081,)),
-                            # TestTensor(masks,shape) if args.test else MaskTensor(masks,shape)])),
                             MaskTensor(masks, shape),
                             transforms.Normalize(*stats)])),
                     batch_size=args.test_batch, shuffle=True, **kwargs)
 
-    # model = TestNet(masks, args.k, shape[0]*10, shape[1]).to(device) if args.test else Net(masks, shape[0]*10, shape[1]).to(device)
+    print('raw data shape')
+    print(train_loader.dataset.train_data.shape)
     model = Net(masks, shape[0]).to(device)
 
     print(str(model)[:-2])

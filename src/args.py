@@ -10,8 +10,8 @@ DIR = 'mnist'
 FOUT = DIR
 
 parser = argparse.ArgumentParser(description='feature space persistence.')
-# parser.add_argument('data', default=DIR, nargs='?', help='dataset. default: %s' % DIR)
-parser.add_argument('data', default='cifar', nargs='?', help='dataset. default: cifar') # %s' % DIR)
+parser.add_argument('data', default=DIR, nargs='?', help='dataset. default: %s' % DIR)
+# parser.add_argument('data', default='cifar', nargs='?', help='dataset. default: cifar') # %s' % DIR)
 parser.add_argument('--dir', default=DIR, help='source data directory. default: %s' % DIR)
 parser.add_argument('-n', '--n', type=int, default=10, help='size of each group (dimension)')
 parser.add_argument('-D', '--dims', type=int, default=DIMS, help='max dimension. default: %d' % DIMS)

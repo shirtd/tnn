@@ -2,7 +2,6 @@ from args import DIMS, DIM, DIR
 from ripser import ripser
 from mnist import MNIST
 from src.util import *
-#import persim, umap
 import numpy as np
 import warnings
 
@@ -19,38 +18,27 @@ def fmap(r, d):
 def persist(data, X, dim, c):
     return ripser(data['X'][X[c]].T, do_cocycles=True, maxdim=dim)
 
-def get_persist(data, dims=DIMS, n=10):
-    dims = range(dims+1)
+def get_persist(data, dim=DIMS, n=10):
+    dims = range(dim+1)
     C = np.unique(data['y'])
     X = {c : np.where(data['y'] == c)[0] for c in C}
     sprint(2, '| computing persistence diagrams')
     warnings.filterwarnings("ignore")
-    R = dmap(persist, C, data, X, max(dims))
-    # R = {c : ripser(data['X'][X[c]].T, do_cocycles=True) for c in C}
+    R = dmap(persist, C, data, X, dim)
     sprint(2, '| retrieving cocycles')
     B = {d : {c : R[c]['dgms'][d] for c in C} for d in dims}
     D = {d : {c : fmap(R[c], d) for c in C} for d in dims}
-    return {'keys' : C, 'data' : data, 'diagrams' : D, 'barcodes' : B} #, 'cocycles' : G}
+    return {'keys' : C, 'data' : data, 'diagrams' : D, 'barcodes' : B}
 
 def to_mask(dgm, k, l, n):
     c = dgm['cycles'] if len(dgm['cycles']) < k else dgm['cycles'][:k]
     return [dgm['t'] if i in dgm['cycles'][:k] else l for i in range(n)]
-
-# def make_masks(dgm, k=100, l=0.0):
-#     return np.vstack(map(lambda x: to_mask(x, k, l), dgm)).reshape(-1, 28, 28)
-#
-# def masks_fun(dgms, k, l, c):
-#     return make_masks(dgms[c], k ,l)
 
 def masks_fun(dgms, k, l, s, c):
     return np.vstack(map(lambda x: to_mask(x, k, l, s[0]*s[1]), dgms[c])).reshape(-1, *s)
 
 def get_masks(jdict, dim=DIM, k=100, l=0.0):
     return dmap(masks_fun, jdict['keys'], jdict['diagrams'][dim], k ,l, jdict['data']['shape'])
-    # x, args = jdict['keys'], (jdict['diagrams'][dim], k ,l)
-    # return dict(zip(jdict['keys'], pmap(masks_fun, x, *args)))
-    # return dict(zip(jdict['keys'], pmap(f, jdict['keys'])))
-    # return {c : make_masks(jdict['diagrams'][dim][c], k ,l, f) for c in jdict['keys']}
 
 def fmask(X):
     y = np.array(np.sum(X, axis=0), dtype=float)

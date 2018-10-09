@@ -12,7 +12,7 @@ def main(args, data='train', dir='plot'):
         sprint(0, '[ args ]')
         for k in sorted(args.__dict__.keys()):
             sprint(2, "({}): {}".format(k, args.__dict__[k]))
-    train, C = get_data(args.data, 'train', args.dir)
+    train, C = get_data(args.data, 'train')
     jdicts = [build(args, t, i) for i,t in enumerate(train)]
     masks = {c : build_mask(jdicts, c) for c in C}
     plot(args, jdicts, masks)
@@ -21,11 +21,8 @@ def main(args, data='train', dir='plot'):
 if __name__ == '__main__':
     args = parser.parse_args()
     jdicts, masks, train = main(args)
-    # jdicts = main(args)
 
 # Y = [standardize(MX[i], s) for i,s in enumerate(S)]
-
-
 
 # MX = [[m[i] * X[i] for i in range(3)] for m in M]
 # M = np.array([m.reshape(3, 1024) for m in _masks]
