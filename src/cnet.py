@@ -60,9 +60,9 @@ class Net(nn.Module):
         # self.n7 = self.n0 * 4
         # self.n8 = self.n0 * 2
         self.n3 = self.n2 * self.x1 * self.x2
-        self.n4 = self.n3 / 4
-        self.n5 = self.n4 / 4
-        self.n6 = self.n5 / 3
+        self.n4 = self.n3 / 3
+        self.n5 = self.n4 / 2
+        self.n6 = self.n5 / 2
         self.n7 = self.n6 / 2
         self.n8 = self.n7 / 2
 
