@@ -42,10 +42,10 @@ def get_masks(jdict, dim=DIM, k=100, l=0.0):
 
 def fmask(X):
     y = np.array(np.sum(X, axis=0), dtype=float)
-    for i in range(y.shape[2]):
-        x = y[:,:,i]
-        num, den = x - x.min(), x.max() - x.min()
-        y[:,:,i] = x if x.max() == 0 else x / x.max() if den == 0 else num / den
+    # for i in range(y.shape[2]):
+    #     x = y[:,:,i]
+    #     num, den = x - x.min(), x.max() - x.min()
+    #     y[:,:,i] = x if x.max() == 0 else x / x.max() if den == 0 else num / den
     return y
 
 def build(args, dat, i):
