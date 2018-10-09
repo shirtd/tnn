@@ -31,9 +31,10 @@ class MaskTensor(object):
     def __call__(self, x):
         if self.masks == None:
             return x
-        X = torch.stack([m * x for m in self.masks], 0)
-        Y = X.view(self.shape[0] * len(self.masks), self.shape[1], self.shape[2])
-        return Y
+        return torch.stack([m * x for m in self.masks], 0)
+        # X = torch.stack([m * x for m in self.masks], 0)
+        # Y = X.view(self.shape[0] * len(self.masks), self.shape[1], self.shape[2])
+        # return Y
 
 class Net(nn.Module):
     def __init__(self, masks, s):
