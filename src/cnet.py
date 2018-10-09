@@ -50,8 +50,8 @@ class Net(nn.Module):
         self.k1, self.k2 = 4, 4
         self.s1, self.s2 = 1, 1
         self.p1,self.p2 = self.k1 / 2, self.k2 / 2
-        self.x1 = self.n0 * self.w1 # / (self.n1/self.n0) / (self.n2/self.n1)
-        self.x2 = self.n0 * self.w2 # / (self.n1/self.n0) / (self.n2/self.n1)
+        self.x1 = self.w1 / (self.n1/self.n0) / (self.n2/self.n1)
+        self.x2 = self.w2 / (self.n1/self.n0) / (self.n2/self.n1)
         # connected
         # self.n3 = self.n0 * 64 #/ (self.s1 * self.s2)
         # self.n4 = self.n0 * 32 #/ (self.s1 * self.s2)
@@ -59,7 +59,7 @@ class Net(nn.Module):
         # self.n6 = self.n0 * 8
         # self.n7 = self.n0 * 4
         # self.n8 = self.n0 * 2
-        self.n3 = self.x1 * self.x2
+        self.n3 = self.n2 * self.x1 * self.x2
         self.n4 = self.n3 / 4
         self.n5 = self.n4 / 4
         self.n6 = self.n5 / 3
