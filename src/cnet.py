@@ -60,11 +60,12 @@ class Net(nn.Module):
         # self.n7 = self.n0 * 4
         # self.n8 = self.n0 * 2
         self.n3 = self.n2 * self.x1 * self.x2
-        self.n4 = self.n3 / 3
+        self.n4 = self.n3 / 2
         self.n5 = self.n4 / 2
         self.n6 = self.n5 / 2
         self.n7 = self.n6 / 2
         self.n8 = self.n7 / 2
+        self.n9 = self.n8 / 2
 
         ''' layers '''
         # convolution
@@ -77,7 +78,8 @@ class Net(nn.Module):
         self.fc3 = nn.Linear(self.n5, self.n6)
         self.fc4 = nn.Linear(self.n6, self.n7)
         self.fc5 = nn.Linear(self.n7, self.n8)
-        self.fc6 = nn.Linear(self.n8, self.n)
+        self.fc6 = nn.Linear(self.n8, self.n9)
+        self.fc7 = nn.Linear(self.n9, self.n)
 
     def view(self, x):
         return x.view(-1, self.n3)
@@ -116,8 +118,11 @@ class Net(nn.Module):
         # linear4 -> linear5
         x = self.fc5(x)
         x = F.relu(x)
-        # linear5 -> linear6 (out)
+        # linear5 -> linear6
         x = self.fc6(x)
+        x = F.relu(x)
+        # linear6 -> linear7 (out)
+        x = self.fc7(x)
         return F.log_softmax(x, dim=1)
 
 ''' RUN TRAIN '''
