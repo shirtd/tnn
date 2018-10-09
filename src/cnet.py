@@ -36,30 +36,40 @@ class MaskTensor(object):
         return Y
 
 class Net(nn.Module):
-    def __init__(self, masks, c):
+    def __init__(self, masks, s):
         super(Net, self).__init__()
         ''' in/out '''
         self.masks = masks
-        self.n0 = c * (len(self.masks) if len(self.masks) > 0 else 1)
+        self.c, self.w1, self.w2 = s
+        self.n0 = self.c * (len(self.masks) if len(self.masks) > 0 else 1)
         self.n = len(masks)
         ''' neurons '''
         # convolution
         self.n1 = self.n0 * 2
         self.n2 = self.n0 * 4
-        self.k1, self.k2 = 5, 5
-        # self.s1, self.s2 = 2, 2
+        self.k1, self.k2 = 4, 4
+        self.s1, self.s2 = 1, 1
+        self.p1,self.p2 = self.k1 / 2, self.k2 / 2
+        self.x1 = self.n0 * self.w1 # / (self.n1/self.n0) / (self.n2/self.n1)
+        self.x2 = self.n0 * self.w2 # / (self.n1/self.n0) / (self.n2/self.n1)
         # connected
-        self.n3 = self.n0 * 128 #/ (self.s1 * self.s2)
-        self.n4 = self.n0 * 64 #/ (self.s1 * self.s2)
-        self.n5 = self.n0 * 32 #/ (self.s1 * self.s2)
-        self.n6 = self.n0 * 16
-        self.n7 = self.n0 * 8
-        self.n8 = self.n0 * 4
+        # self.n3 = self.n0 * 64 #/ (self.s1 * self.s2)
+        # self.n4 = self.n0 * 32 #/ (self.s1 * self.s2)
+        # self.n5 = self.n0 * 16 #/ (self.s1 * self.s2)
+        # self.n6 = self.n0 * 8
+        # self.n7 = self.n0 * 4
+        # self.n8 = self.n0 * 2
+        self.n3 = self.x1 * self.x2
+        self.n4 = self.n3 / 4
+        self.n5 = self.n4 / 4
+        self.n6 = self.n5 / 3
+        self.n7 = self.n6 / 2
+        self.n8 = self.n7 / 2
 
         ''' layers '''
         # convolution
-        self.conv1 = nn.Conv2d(self.n0, self.n1, self.k1) #, stride=self.s1)
-        self.conv2 = nn.Conv2d(self.n1, self.n2, self.k2) #, stride=self.s2)
+        self.conv1 = nn.Conv2d(self.n0, self.n1, self.k1, self.s1, self.p1)
+        self.conv2 = nn.Conv2d(self.n1, self.n2, self.k2, self.s2, self.p2)
         self.conv2_drop = nn.Dropout2d()
         # connected
         self.fc1 = nn.Linear(self.n3, self.n4)
@@ -75,17 +85,21 @@ class Net(nn.Module):
     def forward(self, x):
         ''' convolution '''
         # in -> conv1
+        # print(x.shape)
         x = self.conv1(x)
         x = F.max_pool2d(x, 2)
         x = F.relu(x)
         # conv1 -> conv2
+        # print(x.shape)
         x = self.conv2(x)
         x = self.conv2_drop(x)
         x = F.max_pool2d(x, 2)
         x = F.relu(x)
+        # print(x.shape)
 
         ''' connected '''
         x = self.view(x)
+        # print(x.shape)
         # conv2 -> linear1
         x = self.fc1(x)
         x = F.relu(x)
@@ -170,9 +184,9 @@ def cnet(args, masks, stats):
                             transforms.Normalize(*stats)])),
                     batch_size=args.test_batch, shuffle=True, **kwargs)
 
-    print('raw data shape')
-    print(train_loader.dataset.train_data.shape)
-    model = Net(masks, shape[0]).to(device)
+    # print('raw data shape')
+    # print(train_loader.dataset.train_data.shape)
+    model = Net(masks, shape).to(device)
 
     print(str(model)[:-2])
 
