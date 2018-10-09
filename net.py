@@ -22,9 +22,11 @@ def main(args):
     else:
         train, C = get_data(args.data, 'train')
         jdicts = [build(args, t, i) for i,t in enumerate(train)]
-        masks = [np.swapaxes(np.swapaxes(build_mask(jdicts, c), 1, 3), 2, 3) for c in C]
-        # masks = map(fmask, [build_mask(jdicts, c) for c in C])
-        masks = map(fmask, masks)
+        masks = map(fmask, [build_mask(jdicts, c) for c in C])
+        masks = [np.swapaxes(np.swapaxes(m, 0, 2), 1, 2) for m in masks]
+        # masks = [np.swapaxes(np.swapaxes(build_mask(jdicts, c), 1, 3), 2, 3) for c in C]
+        # # masks = map(fmask, [build_mask(jdicts, c) for c in C])
+        # masks = map(fmask, masks)
         if args.save:
             if not os.path.exists(args.sdir):
                 sprint(2, '! creating directory %s' % args.sdir)
@@ -37,6 +39,7 @@ def main(args):
     stats = zip(*all_stats(train, masks).reshape(-1, 2))
     del train
     return masks, stats
+    # return masks, jdicts
 
 if __name__ == '__main__':
     args = parser.parse_args()
