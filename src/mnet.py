@@ -181,12 +181,14 @@ def mnet(args, masks, k):# stats):
     train_loader = DataLoader(DATA('../data', train=True, download=True,
                         transform = transforms.Compose([
                             transforms.ToTensor(),
+                            transforms.Normalize((0.1307,), (0.3081,)),
                             MaskTensor(masks, shape)])),
                             # transforms.Normalize(*stats)])),
                     batch_size=args.batch, shuffle=True, **kwargs)
     test_loader = DataLoader(DATA('../data', train=False,
                         transform = transforms.Compose([
                             transforms.ToTensor(),
+                            transforms.Normalize((0.1307,), (0.3081,)),
                             MaskTensor(masks, shape)])),
                             # transforms.Normalize(*stats)])),
                     batch_size=args.test_batch, shuffle=True, **kwargs)
