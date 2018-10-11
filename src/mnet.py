@@ -182,8 +182,9 @@ def mnet(args, masks, k):# stats):
                     transform = transforms.Compose([
                         transforms.ToTensor(),
                         transforms.Normalize((0.1307,), (0.3081,)),
-                        MaskTensor(masks, shape)])),
+                        MaskTensor(masks, shape)]))
                         # transforms.Normalize(*stats)])),
+
     test_data = DATA('../data', train=False,
                     transform = transforms.Compose([
                         transforms.ToTensor(),
