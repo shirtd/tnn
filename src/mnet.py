@@ -173,25 +173,26 @@ def mnet(args, masks, k):# stats):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+    kwargs = {'num_workers': 4, 'pin_memory': True} if use_cuda else {}
 
     DATA = DATASETS[args.data]
     shape = SHAPE[args.data]
 
-    train_loader = DataLoader(DATA('../data', train=True, download=True,
-                        transform = transforms.Compose([
-                            transforms.ToTensor(),
-                            transforms.Normalize((0.1307,), (0.3081,)),
-                            MaskTensor(masks, shape)])),
-                            # transforms.Normalize(*stats)])),
-                    batch_size=args.batch, shuffle=True, **kwargs)
-    test_loader = DataLoader(DATA('../data', train=False,
-                        transform = transforms.Compose([
-                            transforms.ToTensor(),
-                            transforms.Normalize((0.1307,), (0.3081,)),
-                            MaskTensor(masks, shape)])),
-                            # transforms.Normalize(*stats)])),
-                    batch_size=args.test_batch, shuffle=True, **kwargs)
+    train_data = DATA('../data', train=True, download=True,
+                    transform = transforms.Compose([
+                        transforms.ToTensor(),
+                        transforms.Normalize((0.1307,), (0.3081,)),
+                        MaskTensor(masks, shape)])),
+                        # transforms.Normalize(*stats)])),
+    test_data = DATA('../data', train=False,
+                    transform = transforms.Compose([
+                        transforms.ToTensor(),
+                        transforms.Normalize((0.1307,), (0.3081,)),
+                        MaskTensor(masks, shape)]))
+                        # transforms.Normalize(*stats)])),
+
+    train_loader = DataLoader(train_data, batch_size=args.batch, shuffle=True, **kwargs)
+    test_loader = DataLoader(test_data, batch_size=args.test_batch, shuffle=True, **kwargs)
 
     # print('raw data shape')
     # print(train_loader.dataset.train_data.shape)
