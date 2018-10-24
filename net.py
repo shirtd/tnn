@@ -45,20 +45,3 @@ if __name__ == '__main__':
     args = parser.parse_args()
     masks, stats = main(args)
     net = cnet(args, masks, stats)
-
-# X = torch.stack([m * x for m in masks], 0).view(len(masks), *shape)
-#
-# #     # if args.test:
-# #     #     # mn = min(map(len, jdict['masks'].values()))
-# #     #     mn = min(map(len, masks.values()))
-# #     #     l = args.k if args.k < mn else mn
-# #     #     _masks = np.array([jdict['masks'][c][:l] for c in jdict['keys']])
-# #     # # else:
-# #     # #     masks = [fmask(jdict['masks'][c]) for c in jdict['keys']]
-# # else:
-# #     train = get_data(args.data, 'train', args.dir)
-# #     test = get_data(args.data, 'test', args.dir)
-# train,C = get_data(args.data, 'train', args.dir)
-# test,_C = get_data(args.data, 'test', args.dir)
-# jdicts = [build(args, t, i) for i,t in enumerate(train)]
-# masks = [build_mask(jdicts, c) for c in C]
