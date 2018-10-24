@@ -23,7 +23,8 @@ def pad(k):
 class MaskTensor(object):
     def __init__(self, masks, shape):
         super(MaskTensor, self).__init__()
-        if len(masks) > 0:
+        self.n = len(masks)
+        if self.n > 0:
             self.masks = [torch.from_numpy(m).float() for m in masks]
         else:
             self.masks = None
@@ -31,10 +32,8 @@ class MaskTensor(object):
     def __call__(self, x):
         if self.masks == None:
             return x
-        return torch.stack([m * x for m in self.masks], 0)
-        # X = torch.stack([m * x for m in self.masks], 0)
-        # Y = X.view(self.shape[0] * len(self.masks), self.shape[1], self.shape[2])
-        # return Y
+        X = torch.stack([m * x for m in self.masks], 0)
+        return X.view(self.shape[0] * self.n, self.shape[1], self.shape[2])
 
 class Net(nn.Module):
     def __init__(self, masks, s):
